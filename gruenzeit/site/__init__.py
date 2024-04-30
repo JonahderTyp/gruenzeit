@@ -3,8 +3,31 @@ from flask_login import current_user
 from flask_login.utils import login_required, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 from ..database.db import User
+from .admin import admin_site
 
 site = Blueprint("site", __name__, template_folder="templates", url_prefix="/")
+
+site.register_blueprint(admin_site)
+
+
+@site.context_processor
+def inject_views():
+    if not current_user.is_authenticated:
+        return {"views": []}
+    usr: User = current_user
+    views = []
+    if usr.usertype_id == 1:
+        views.append({"name": "Einstellungen",
+                      "multi": [{"name": "admin",
+                                 "url": url_for("site.admin.admin")},
+                                {"name": "Neuer Benutzer",
+                                 "url": url_for("site.admin.addUser")},
+                                 {"name": "Benutzer",
+                                 "url": url_for("site.admin.users")},
+                                ]})
+    views.append({"name": "Logout",
+                  "url": url_for("site.logout")})
+    return {"views": views}
 
 
 @site.get("/")
@@ -13,7 +36,7 @@ def index():
         print("user is not authenticated, redirecting to login...")
         return redirect(url_for('.login'))
     print("user is authenticated, redirecting to home...")
-    return redirect(".home")
+    return redirect(url_for(".home"))
 
 
 @site.route("/login", methods=["GET", "POST"])
@@ -29,7 +52,8 @@ def login():
         # print("passwordHash:", user.password_hash)
         if user and check_password_hash(user.password_hash, password):
             login_user(user)
-            print("login successful, user id:", user.username)  # Log user ID to verify
+            # Log user ID to verify
+            print("login successful, user id:", user.username)
             return redirect(url_for('.home'))
         else:
             print("login failed")
