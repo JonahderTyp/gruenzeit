@@ -4,3 +4,4 @@ reportlab==4.0.9
 SQLAlchemy
 Flask-DB
 Flask-SQLAlchemy
+Flask-Login

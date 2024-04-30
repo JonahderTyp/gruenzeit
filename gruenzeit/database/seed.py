@@ -1,8 +1,8 @@
-from .db import Fahrzeug, TimeType, db, Mitarbeiter
-
+from .db import Fahrzeug, TimeType, db, User, UserType
+from werkzeug.security import generate_password_hash
 
 def _seed_mitarbeiter():
-    mitarbeiter = [Mitarbeiter(name=n) for n in [
+    mitarbeiter = [User(name=n) for n in [
         "Lena Schröder",
         "Tobias Müller",
         "Katharina Vogel",
@@ -33,6 +33,15 @@ def seed_database():
     ]
     db.session.bulk_save_objects(fahrzeuge)
 
-    _seed_mitarbeiter()
+    userTypes = [
+        UserType(id=1, name="admin"),
+        UserType(id=2, name="Geschäftsführer"),
+        UserType(id=3, name="Mitarbeiter"),
+    ]
+    db.session.bulk_save_objects(userTypes)
+
+    # _seed_mitarbeiter()
+
+    User.createNew("admin", "admin", generate_password_hash("admin"), 1)
 
     db.session.commit()
