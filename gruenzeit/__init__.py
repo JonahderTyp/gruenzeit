@@ -2,6 +2,7 @@ import os
 import logging
 from flask import Flask
 from pathlib import Path
+from .database.seed import seed_database
 
 
 def create_app():
@@ -9,7 +10,8 @@ def create_app():
     logging.basicConfig(level=logging.INFO)
     logging.info("Creating App")
 
-    INSTANCE_PATH = os.path.abspath(os.path.join(os.path.abspath(__path__[0]), "../instance"))
+    INSTANCE_PATH = os.path.abspath(os.path.join(
+        os.path.abspath(__path__[0]), "../instance"))
 
     app = Flask(__name__, instance_path=INSTANCE_PATH)
 
@@ -21,6 +23,21 @@ def create_app():
     else:
         logging.warning(
             "Configuration file not found at {}".format(config_path))
+
+    from .database import db
+
+    db.init_app(app)
+
+    with app.app_context():
+        db.create_all()
+
+        # Check if every Table is empty
+        NEW_DB = all(db.session.query(table).first()
+                     is None for table in db.metadata.sorted_tables)
+
+        if NEW_DB:
+            logging.info("All tables are empty. Seeding database...")
+            seed_database()
 
     from .site import site
     app.register_blueprint(site)

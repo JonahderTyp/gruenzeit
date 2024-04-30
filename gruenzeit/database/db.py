@@ -7,25 +7,58 @@ import typing
 
 db = SQLAlchemy()
 
+
 class Mitarbeiter(db.Model):
-    __tablename__ = "mitarbeiter"
-    id = Column(Integer, primary_key=True)
-    name = Column(String(255), nullable=False)
+    __tablename__ = 'mitarbeiter'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(255), nullable=True)
 
-class Team(db.Model):
-    __tablename__ = "team"
-    id = Column(Integer, primary_key=True)
-    team_name = Column(String(255), nullable=False)
-    members = relationship("TeamAssignment", back_populates="team")
 
-class TeamAssignment(db.Model):
-    __tablename__ = "team_assignment"
-    team_id = Column(Integer, ForeignKey('team.id'), primary_key=True)
-    employee_id = Column(Integer, ForeignKey('mitarbeiter.id'), primary_key=True)
+class Fahrzeug(db.Model):
+    __tablename__ = 'fahrzeug'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(45), nullable=True)
+    kennzeichen = Column(String(45), nullable=True)
+
+
+class TimeType(db.Model):
+    __tablename__ = 'timetype'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(45), nullable=True)
+
+
+class Baustellen(db.Model):
+    __tablename__ = 'baustellen'
+    id = Column(Integer, primary_key=True)
+    baustellencol = Column(String(45), nullable=True)
+
+
+class TimeEntries(db.Model):
+    __tablename__ = 'timeentries'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    time = Column(String(45), nullable=True)
+    mitarbeiter_id = Column(Integer, ForeignKey('mitarbeiter.id'))
+    time_type_id = Column(Integer, ForeignKey('timetype.id'))
+    baustellen_id = Column(
+        Integer, ForeignKey('baustellen.id'))
+    mitarbeiter = relationship('Mitarbeiter', backref='time_entries')
+    time_type = relationship('TimeType', backref='time_entries')
+    baustellen = relationship('Baustellen', backref='time_entries')
+  
+
+class FahrzeugAssignments(db.Model):
+    __tablename__ = 'fahrzeugassignments'
+    id = Column(Integer, primary_key=True, autoincrement=True)
     date = Column(Date, nullable=False)
-    team = relationship("Team", back_populates="members")
-    employee = relationship("Mitarbeiter", back_populates="teams")
+    team_id = Column(Integer, ForeignKey('fahrzeug.id'))
+    mitarbeiter_id = Column(Integer, ForeignKey('mitarbeiter.id'))
+    fahrzeug = relationship('Fahrzeug', backref='assignments')
+    mitarbeiter = relationship('Mitarbeiter', backref='vehicle_assignments')
 
 
-
-
+class Bild(db.Model):
+    __tablename__ = 'bild'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    bild = Column(String(45), nullable=True)
+    baustellen_id = Column(Integer, ForeignKey('baustellen.id'))
+    baustellen = relationship('Baustellen', backref='bilder')
