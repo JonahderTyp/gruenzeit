@@ -43,8 +43,8 @@ def index():
 def login():
     print("login", current_user)
     if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
+        username = request.form["username"].strip()
+        password = request.form["password"].strip()
         user = User.query.filter_by(username=username).first()
         # print("Username:", username)
         print("User:", user)

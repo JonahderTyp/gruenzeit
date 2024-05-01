@@ -22,6 +22,13 @@
                             </div>
                             <div class="col-12">
                                 <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" name="name" id="name"
+                                        placeholder="name@example.com" required>
+                                    <label for="name" class="form-label">Vor- und Nachname</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-floating mb-3">
                                     <input type="password" class="form-control" name="password" id="password" value=""
                                         placeholder="Password" required>
                                     <label for="password" class="form-label">Password</label>
@@ -29,7 +36,7 @@
                             </div>
                             <div class="input-group mb-3">
                                 <label class="input-group-text" for="inputGroupSelect01">Typ</label>
-                                <select class="form-select" id="inputGroupSelect01">
+                                <select class="form-select" id="inputGroupSelect01" name="usertype">
                                     {% for type in types %}
                                     <option value="{{type.id}}">{{type.name}}</option>
                                     {% endfor %}

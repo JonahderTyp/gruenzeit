@@ -1,9 +1,9 @@
+from __future__ import annotations
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey, Date
-from datetime import datetime
-import typing
+from .exceptions import ElementAlreadyExists, ElementDoesNotExsist
 
 
 db = SQLAlchemy()
@@ -23,10 +23,14 @@ class User(db.Model, UserMixin):
     password_hash = Column(String(255), nullable=True)
     usertype_id = Column(Integer, ForeignKey('usertype.id'), nullable=True)
 
-    def createNew(username, name, password_hash, usertype_id):
+    @staticmethod
+    def createNew(username: str, name: str, password_hash, usertype_id) -> User:
+        if User.query.get(username):
+            raise ElementAlreadyExists(
+                f"User mit dem Benutzernamen \"{username}\" existiert bereits")
         new_user = User(
-            username=username,
-            name=name,
+            username=username.strip(),
+            name=name.strip(),
             password_hash=password_hash,
             usertype_id=usertype_id
         )

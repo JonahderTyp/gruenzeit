@@ -1,2 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Benutzer{% endblock %}
+{% block content %}
 
-{{ user }}
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Benutzername</th>
+                <th scope="col">Vor- und Nachname</th>
+                <th scope="col">Typ</th>
+                <th scope="col">Aktion</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for usr in user %}
+            <tr>
+                <th scope="row">{{usr.username}}</th>
+                <td>{{usr.name}}</td>
+                <td>{{usr.usertype}}</td>
+                <td>
+                    <a href="{{ url_for('site.admin.user', username=usr.username) }}">
+                        <i class="bi bi-gear-fill"></i>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
