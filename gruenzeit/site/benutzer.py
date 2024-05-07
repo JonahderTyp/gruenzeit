@@ -5,6 +5,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from ..database.db import UserType, User, TimeEntries
 from ..database.exceptions import ElementAlreadyExists, ElementDoesNotExsist
 from pprint import pprint
+from datetime import datetime
 
 benutzer_site = Blueprint("benutzer", __name__, url_prefix="/benutzer")
 
@@ -15,7 +16,17 @@ def index():
     usr: User = current_user
     userstatus = TimeEntries.getCurrentEntry(usr)
     useravailable = TimeEntries.getAvailableEntrys(usr)
-    return render_template("mitarbeiter/stempel.html", userstatus=userstatus, useravailable=useravailable)
+    current_time = datetime.now()
+
+    current_hour = current_time.hour
+    current_minute = (current_time.minute // 15)*15
+
+    return render_template("mitarbeiter/stempel.html",
+                           userstatus=userstatus,
+                           useravailable=useravailable,
+                           currHour=current_hour,
+                           currMin=current_minute)
+
 
 @benutzer_site.get("/stempeln")
 @login_required
