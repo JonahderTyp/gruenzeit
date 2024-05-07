@@ -10,8 +10,8 @@
                 role="tab" aria-controls="table" aria-selected="true">Übersicht</button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="form-tab" data-bs-toggle="tab" data-bs-target="#form" type="button"
-                role="tab" aria-controls="form" aria-selected="false">Neu</button>
+            <button class="nav-link" id="form-tab" data-bs-toggle="tab" data-bs-target="#form" type="button" role="tab"
+                aria-controls="form" aria-selected="false">Neu</button>
         </li>
     </ul>
     <div class="tab-content" id="myTabContent">
@@ -20,14 +20,11 @@
                 <thead>
                     <tr>
                         <th scope="col">#</th>
-                        <th scope="col">Column 1</th>
-                        <th scope="col">Column 2</th>
-                        <th scope="col">Column 3</th>
-                        <th scope="col">Column 4</th>
-                        <th scope="col">Column 4</th>
-                        <th scope="col">Column 4</th>
-                        <th scope="col">Column 4</th>
-                        <th scope="col">Column 4</th>
+                        <th scope="col">Auftragsnummer</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">adresse</th>
+                        <th scope="col">beschreibung</th>
+                        <th scope="col"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -38,10 +35,15 @@
                         <td>{{baustelle.name}}</td>
                         <td>{{baustelle.adresse}}</td>
                         <td>{{baustelle.beschreibung}}</td>
-                        <td>{{baustelle.beschreibung}}</td>
-                        <td>{{baustelle.beschreibung}}</td>
-                        <td>{{baustelle.beschreibung}}</td>
-                        <td>{{baustelle.beschreibung}}</td>
+                        <td>
+                            <form action="{{url_for('site.leitung.baustellen')}}">
+                                <input type="text" class="form-control visually-hidden" name="id"
+                                    value="{{baustelle.id}}" />
+                                <button type="submit" class="btn btn-secondary">
+                                    Bearbeiten
+                                </button>
+                            </form>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
