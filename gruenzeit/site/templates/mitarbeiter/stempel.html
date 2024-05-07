@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Stempeln{% endblock %}
+{% block content %}
+<h1>Stempeln</h1>
+<h1>Hallo {{current_user.name}}</h1>
+<h1>Aktuell bist du {{ userstatus }}</h1>
+<h1>Du kannst folgendes Stempeln:
+    {% for timetype in useravailable %}
+    {{timetype.name}}
+    {%endfor%}</h1>
+<div class="container py-5">
+    <div class="row">
+        <div class="col-auto">
+            <form id="timeForm">
+                <div class="table-responsive">
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td scope="row">
+                                    <button type="button" class="btn btn-outline-secondary w-100"
+                                        onclick="changeTime('hours', 1)">↑</button>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-outline-secondary w-100"
+                                        onclick="changeTime('minutes', 15)">↑</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td scope="row">
+                                    <input type="text" class="form-control" id="hours" name="hours" value="12" readonly>
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" id="minutes" name="minutes" value="00"
+                                        readonly>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td scope="row">
+                                    <button type="button" class="btn btn-outline-secondary w-100"
+                                        onclick="changeTime('hours', -1)">↓</button>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-outline-secondary w-100"
+                                        onclick="changeTime('minutes', -15)">↓</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-grid gap-2 mt-3">
+                    <button type="submit" class="btn btn-primary">Submit Time</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    function changeTime(type, change) {
+        const hoursInput = document.getElementById('hours');
+        const minutesInput = document.getElementById('minutes');
+        let hoursValue = parseInt(hoursInput.value);
+        let minutesValue = parseInt(minutesInput.value);
+
+        if (type === 'hours') {
+            hoursValue += change;
+            if (hoursValue > 23) hoursValue = 0;
+            if (hoursValue < 0) hoursValue = 23;
+            hoursInput.value = hoursValue.toString().padStart(2, '0');
+        } else if (type === 'minutes') {
+            minutesValue += change;
+            if (minutesValue > 59) {
+                minutesValue -= 60;
+                changeTime('hours', 1); // Automatically adjust hour when minutes exceed 59
+            }
+            if (minutesValue < 0) {
+                minutesValue += 60;
+                changeTime('hours', -1); // Automatically adjust hour when minutes go below 0
+            }
+            minutesInput.value = minutesValue.toString().padStart(2, '0');
+        }
+    }
+</script>
+{% endblock %}

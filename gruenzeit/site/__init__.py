@@ -4,10 +4,14 @@ from flask_login.utils import login_required, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 from ..database.db import User
 from .admin import admin_site
+from .benutzer import benutzer_site
+from .leitung import leitung_site
 
 site = Blueprint("site", __name__, template_folder="templates", url_prefix="/")
 
 site.register_blueprint(admin_site)
+site.register_blueprint(benutzer_site)
+site.register_blueprint(leitung_site)
 
 
 @site.context_processor
@@ -20,11 +24,18 @@ def inject_views():
         views.append({"name": "Einstellungen",
                       "multi": [{"name": "admin",
                                  "url": url_for("site.admin.admin")},
+                                {"name": "Benutzer",
+                                 "url": url_for("site.admin.users")},
                                 {"name": "Neuer Benutzer",
                                  "url": url_for("site.admin.addUser")},
-                                 {"name": "Benutzer",
-                                 "url": url_for("site.admin.users")},
                                 ]})
+    if usr.usertype_id <= 2:
+        views.append({"name": "Geschäftsleitung",
+                      "multi": [{"name": "Baustellen",
+                                 "url": url_for("site.leitung.baustellen")}]})
+    if usr.usertype_id <= 3:
+        views.append({"name": "Stempeln",
+                      "url": url_for("site.benutzer.stempeln")})
     views.append({"name": "Logout",
                   "url": url_for("site.logout")})
     return {"views": views}
@@ -45,7 +56,7 @@ def login():
     if request.method == "POST":
         username = request.form["username"].strip()
         password = request.form["password"].strip()
-        user = User.query.filter_by(username=username).first()
+        user: User = User.query.filter_by(username=username).first()
         # print("Username:", username)
         print("User:", user)
         # print("password:", password)

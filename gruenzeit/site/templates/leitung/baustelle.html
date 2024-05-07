@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Baustellen{% endblock %}
+{% block content %}
+
+<h1>Baustelle</h1>
+{{baustelle}}
+
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Baustelle #{{ baustelle.auftragsnummer }}</h5>
+            <div class="mb-3">
+                <label for="baustelleName" class="form-label mb-0 "><strong>Name:</strong></label>
+                <p id="baustelleName">{{ baustelle.name }}</p>
+            </div>
+            <div class="mb-3">
+                <label for="baustelleAdresse" class="form-label mb-0 "><strong>Adresse:</strong></label>
+                <p id="baustelleAdresse">{{ baustelle.adresse }}</p>
+            </div>
+            <div class="mb-3">
+                <label for="baustelleBeschreibung" class="form-label mb-0 "><strong>Beschreibung:</strong></label>
+                <p id="baustelleBeschreibung">{% for b in baustelle.beschreibung %} {{b}} <br> {% endfor %}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
