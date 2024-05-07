@@ -57,6 +57,7 @@ class TimeType(db.Model):
 
 
 class Baustelle(db.Model):
+    # TODO add status
     __tablename__ = 'baustelle'
     id = Column(Integer, primary_key=True, autoincrement=True)
     auftragsnummer = Column(String(), nullable=True)

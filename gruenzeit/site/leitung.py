@@ -32,6 +32,9 @@ def baustellen():
                                             auftragsadresse, auftragsbeschreibung)
         return redirect(url_for(".baustellen", id=new_baustelle.id))
     if id:
+        # TODO edit baustelle
+        # TODO delete baustelle
+        # TODO set baustelle status
         bst : Baustelle | None = Baustelle.query.get({"id": id})
         bst.beschreibung = str(bst.beschreibung).split("\n")
         return render_template("leitung/baustelle.html", baustelle=bst)
