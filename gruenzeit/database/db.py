@@ -4,6 +4,7 @@ from flask_login import UserMixin
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey, Date
 from .exceptions import ElementAlreadyExists, ElementDoesNotExsist
+from typing import List
 
 
 db = SQLAlchemy()
@@ -57,14 +58,29 @@ class TimeType(db.Model):
 
 class Baustelle(db.Model):
     __tablename__ = 'baustelle'
-    id = Column(Integer, primary_key=True)
-    name = Column(String(255), nullable=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    auftragsnummer = Column(String(), nullable=True)
+    name = Column(String(), nullable=True)
+    adresse = Column(String(), nullable=True)
+    beschreibung = Column(String(), nullable=True)
+
+    @staticmethod
+    def createNew(auftragsnummer: str, name: str, adresse: str, beschreibung: str) -> Baustelle:
+        new_Baustelle = Baustelle(
+            auftragsnummer=auftragsnummer,
+            name=name,
+            adresse=adresse,
+            beschreibung=beschreibung,
+        )
+        db.session.add(new_Baustelle)
+        db.session.commit()
+        return new_Baustelle
 
 
 class TimeEntries(db.Model):
     __tablename__ = 'timeentries'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    time = Column(String(45), nullable=True)
+    time = Column(DateTime, nullable=True)
     user_id = Column(Integer, ForeignKey('user.username'))
     time_type_id = Column(Integer, ForeignKey('timetype.id'))
     baustelle_id = Column(
@@ -72,6 +88,23 @@ class TimeEntries(db.Model):
     user = relationship('User', backref='time_entries')
     time_type = relationship('TimeType', backref='time_entries')
     baustelle = relationship('Baustelle', backref='time_entries')
+
+    @staticmethod
+    def getCurrentEntry(user) -> TimeType:
+        te: TimeEntries = TimeEntries.query.filter_by(user=user) \
+            .order_by(TimeEntries.time.desc()) \
+            .first()
+        if not te:
+            return None
+        return TimeType.query.get({"id": te.time_type_id})
+
+    @staticmethod
+    def getAvailableEntrys(user: User) -> List[TimeType]:
+        types: List[TimeType] = TimeType.query.all()
+        current = TimeEntries.getCurrentEntry(user)
+        if current is None:
+            return [i for i in types if "beginn" in str(i.name).lower()]
+        pass
 
 
 class FahrzeugAssignments(db.Model):
@@ -87,6 +120,6 @@ class FahrzeugAssignments(db.Model):
 class Bild(db.Model):
     __tablename__ = 'bild'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    bild = Column(String(45), nullable=True)
+    bild = Column(String(), nullable=True)
     baustellen_id = Column(Integer, ForeignKey('baustelle.id'))
     baustellen = relationship('Baustelle', backref='bilder')
