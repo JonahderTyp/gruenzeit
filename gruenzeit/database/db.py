@@ -55,15 +55,21 @@ class TimeType(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(45), nullable=True)
 
+class BaustellenStatus(db.Model):
+    __tablename__ = 'baustellenstatus'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(45), nullable=True)
+    baustellen = relationship('Baustelle', backref='status')
+
 
 class Baustelle(db.Model):
-    # TODO add status
     __tablename__ = 'baustelle'
     id = Column(Integer, primary_key=True, autoincrement=True)
     auftragsnummer = Column(String(), nullable=True)
     name = Column(String(), nullable=True)
     adresse = Column(String(), nullable=True)
     beschreibung = Column(String(), nullable=True)
+    status_id = Column(Integer, ForeignKey('baustellenstatus.id'))
 
     @staticmethod
     def createNew(auftragsnummer: str, name: str, adresse: str, beschreibung: str) -> Baustelle:
