@@ -36,13 +36,8 @@
                         <td>{{baustelle.adresse}}</td>
                         <td>{{baustelle.beschreibung}}</td>
                         <td>
-                            <form action="{{url_for('site.leitung.baustellen')}}">
-                                <input type="text" class="form-control visually-hidden" name="id"
-                                    value="{{baustelle.id}}" />
-                                <button type="submit" class="btn btn-secondary">
-                                    Bearbeiten
-                                </button>
-                            </form>
+                            <a href="{{url_for('site.leitung.baustelle', id=baustelle.id)}}" class="btn btn-secondary"
+                                role="button">Bearbeiten</a>
                         </td>
                     </tr>
                     {% endfor %}

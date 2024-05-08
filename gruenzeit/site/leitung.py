@@ -30,14 +30,17 @@ def baustellen():
             "auftragsbeschreibung").strip().replace("\r\n", "\n")
         new_baustelle = Baustelle.createNew(autragsnummer, auftragsname,
                                             auftragsadresse, auftragsbeschreibung)
-        return redirect(url_for(".baustellen", id=new_baustelle.id))
-    if id:
-        # TODO edit baustelle
-        # TODO delete baustelle
-        # TODO set baustelle status
-        bst : Baustelle | None = Baustelle.query.get({"id": id})
-        bst.beschreibung = str(bst.beschreibung).split("\n")
-        return render_template("leitung/baustelle.html", baustelle=bst)
-    
+        return redirect(url_for(".baustelle", id=new_baustelle.id))
     bst: List[Baustelle] = Baustelle.query.all()
     return render_template("leitung/baustellen.html", baustellen=bst)
+
+
+@leitung_site.route("/baustelle/<int:id>", methods=["GET", "POST"])
+def baustelle(id):
+    error_message = ""
+    # TODO edit baustelle
+    # TODO delete baustelle
+    # TODO set baustelle status
+    bst: Baustelle | None = Baustelle.query.get({"id": id})
+    bst.beschreibung = str(bst.beschreibung).split("\n")
+    return render_template("leitung/baustelle.html", baustelle=bst)
