@@ -55,6 +55,7 @@ class TimeType(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(45), nullable=True)
 
+
 class BaustellenStatus(db.Model):
     __tablename__ = 'baustellenstatus'
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -82,7 +83,35 @@ class Baustelle(db.Model):
         db.session.add(new_Baustelle)
         db.session.commit()
         return new_Baustelle
+    
+    def set_status(self, status: str):
+        status = BaustellenStatus.query.filter_by(name=status).first()
+        if not status:
+            raise ElementDoesNotExsist(
+                f"Status \"{status}\" existiert nicht")
+        self.status_id = status.id
+        db.session.commit()
 
+    @staticmethod
+    def getBaustelleHTML(id: int) -> Baustelle:
+        bst: Baustelle = Baustelle.query.get(id)
+        if not bst:
+            raise ElementDoesNotExsist(
+                f"Baustelle mit der ID {id} existiert nicht")
+        bst.beschreibung = str(bst.beschreibung).split("\n")
+        return bst
+    
+    def edit(self, auftragsnummer: str, name: str, adresse: str, beschreibung: str):
+        db.session.add(self)
+        self.auftragsnummer = auftragsnummer
+        self.name = name
+        self.adresse = adresse
+        self.beschreibung = beschreibung
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
 
 class TimeEntries(db.Model):
     __tablename__ = 'timeentries'
