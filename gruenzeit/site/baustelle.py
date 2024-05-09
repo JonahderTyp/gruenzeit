@@ -7,10 +7,10 @@ from ..database.exceptions import ElementAlreadyExists, ElementDoesNotExsist
 from pprint import pprint
 from typing import List
 
-leitung_site = Blueprint("leitung", __name__, url_prefix="/leitung")
+baustelle_site = Blueprint("baustelle", __name__, url_prefix="/baustelle")
 
 
-@leitung_site.before_request
+@baustelle_site.before_request
 @login_required
 def auth():
     usr: User = current_user
@@ -18,7 +18,7 @@ def auth():
         abort(401)
 
 
-@leitung_site.route("/baustelle", methods=["GET", "POST"])
+@baustelle_site.route("/", methods=["GET", "POST"])
 def baustellen():
     error_message = ""
     if request.method == "POST":
@@ -31,21 +31,39 @@ def baustellen():
                                             auftragsadresse, auftragsbeschreibung)
         return redirect(url_for(".baustelle", id=new_baustelle.id))
     bst: List[Baustelle] = Baustelle.query.all()
-    return render_template("leitung/baustellen.html", baustellen=bst)
+    return render_template("baustelle/baustellen.html", baustellen=bst)
 
 
-@leitung_site.route("/baustelle/<int:id>", methods=["GET"])
+@baustelle_site.route("/new", methods=["GET", "POST"])
+def new():
+    error_message = ""
+    if request.method == "POST":
+        autragsnummer = request.form.get("auftragsnummer").strip()
+        auftragsname = request.form.get("auftragsname").strip()
+        auftragsadresse = request.form.get("auftragsadresse").strip()
+        auftragsbeschreibung = request.form.get(
+            "auftragsbeschreibung").strip().replace("\r\n", "\n")
+        new_baustelle = Baustelle.createNew(autragsnummer, auftragsname,
+                                            auftragsadresse, auftragsbeschreibung)
+        return redirect(url_for(".baustelle", id=new_baustelle.id))
+    return render_template("baustelle/baustelle_new.html")
+
+
+@baustelle_site.route("/<int:id>", methods=["GET"])
 def baustelle(id):
-    bst = Baustelle.getBaustelleHTML(id)
-    return render_template("leitung/baustelle.html", baustelle=bst)
+    try:
+        bst = Baustelle.getBaustelle(id).toHTML()
+    except ElementDoesNotExsist as ex:
+        abort(404)
+    return render_template("baustelle/baustelle.html", baustelle=bst)
 
 
-@leitung_site.route("/baustelle/<int:id>/edit", methods=["GET", "POST"])
+@baustelle_site.route("/<int:id>/edit", methods=["GET", "POST"])
 def edit(id):
     error_message = ""
     statuses = BaustellenStatus.query.all()
     try:
-        bst = Baustelle.getBaustelleHTML(id)
+        bst = Baustelle.getBaustelle(id).toHTML()
     except ElementDoesNotExsist as ex:
         error_message = repr(ex)
         abort(404)
@@ -69,4 +87,4 @@ def edit(id):
             bst.status = status
             bst.save()
             return redirect(url_for(".baustelle", id=id))
-    return render_template("leitung/baustelleedit.html", baustelle=bst, statuses=statuses, error_message=error_message)
+    return render_template("baustelle/baustelleedit.html", baustelle=bst, statuses=statuses, error_message=error_message)

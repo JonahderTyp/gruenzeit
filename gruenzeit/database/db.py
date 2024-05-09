@@ -4,7 +4,7 @@ from flask_login import UserMixin
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey, Date
 from .exceptions import ElementAlreadyExists, ElementDoesNotExsist
-from typing import List
+from typing import List, Dict
 
 
 db = SQLAlchemy()
@@ -62,6 +62,10 @@ class BaustellenStatus(db.Model):
     name = Column(String(45), nullable=True)
     baustellen = relationship('Baustelle', backref='status')
 
+    @staticmethod
+    def getAll() -> dict[int, str]:
+        return {i.id: i.name for i in BaustellenStatus.query.all()}
+
 
 class Baustelle(db.Model):
     __tablename__ = 'baustelle'
@@ -71,6 +75,7 @@ class Baustelle(db.Model):
     adresse = Column(String(), nullable=True)
     beschreibung = Column(String(), nullable=True)
     status_id = Column(Integer, ForeignKey('baustellenstatus.id'))
+    bilder = relationship('Bild', backref='baustellen')
 
     @staticmethod
     def createNew(auftragsnummer: str, name: str, adresse: str, beschreibung: str) -> Baustelle:
@@ -79,11 +84,12 @@ class Baustelle(db.Model):
             name=name,
             adresse=adresse,
             beschreibung=beschreibung,
+            status_id=BaustellenStatus.query.filter_by(name="In Planung").first().id
         )
         db.session.add(new_Baustelle)
         db.session.commit()
         return new_Baustelle
-    
+
     def set_status(self, status: str):
         status = BaustellenStatus.query.filter_by(name=status).first()
         if not status:
@@ -93,14 +99,25 @@ class Baustelle(db.Model):
         db.session.commit()
 
     @staticmethod
-    def getBaustelleHTML(id: int) -> Baustelle:
+    def getBaustelle(id: int) -> Baustelle:
         bst: Baustelle = Baustelle.query.get(id)
         if not bst:
             raise ElementDoesNotExsist(
                 f"Baustelle mit der ID {id} existiert nicht")
-        bst.beschreibung = str(bst.beschreibung).split("\n")
         return bst
-    
+
+    def toHTML(self):
+        bst = {
+            "id": self.id,
+            "auftragsnummer": self.auftragsnummer,
+            "name": self.name,
+            "adresse": self.adresse,
+            "beschreibung": str(self.beschreibung).split("\n"),
+            "status": BaustellenStatus.query.get(self.status_id).name,
+            "bilder": [i.bild for i in self.bilder]
+        }
+        return bst
+
     def edit(self, auftragsnummer: str, name: str, adresse: str, beschreibung: str):
         db.session.add(self)
         self.auftragsnummer = auftragsnummer
@@ -112,6 +129,7 @@ class Baustelle(db.Model):
     def delete(self):
         db.session.delete(self)
         db.session.commit()
+
 
 class TimeEntries(db.Model):
     __tablename__ = 'timeentries'
@@ -158,4 +176,3 @@ class Bild(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
     bild = Column(String(), nullable=True)
     baustellen_id = Column(Integer, ForeignKey('baustelle.id'))
-    baustellen = relationship('Baustelle', backref='bilder')

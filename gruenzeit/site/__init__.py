@@ -5,13 +5,13 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from ..database.db import User
 from .admin import admin_site
 from .benutzer import benutzer_site
-from .leitung import leitung_site
+from .baustelle import baustelle_site
 
 site = Blueprint("site", __name__, template_folder="templates", url_prefix="/")
 
 site.register_blueprint(admin_site)
 site.register_blueprint(benutzer_site)
-site.register_blueprint(leitung_site)
+site.register_blueprint(baustelle_site)
 
 
 @site.context_processor
@@ -30,9 +30,8 @@ def inject_views():
                                  "url": url_for("site.admin.addUser")},
                                 ]})
     if usr.usertype_id <= 2:
-        views.append({"name": "Geschäftsleitung",
-                      "multi": [{"name": "Baustellen",
-                                 "url": url_for("site.leitung.baustellen")}]})
+        views.append({"name": "Baustellen",
+                      "url": url_for("site.baustelle.baustellen")})
     if usr.usertype_id <= 3:
         views.append({"name": "Stempeln",
                       "url": url_for("site.benutzer.stempeln")})
@@ -62,7 +61,7 @@ def login():
         # print("password:", password)
         # print("passwordHash:", user.password_hash)
         if user and check_password_hash(user.password_hash, password):
-            login_user(user)
+            login_user(user, remember=True)
             # Log user ID to verify
             print("login successful, user id:", user.username)
             return redirect(url_for('.home'))
