@@ -1,4 +1,4 @@
-from .db import Fahrzeug, TimeType, db, user, user_type, job_status
+from .db import vehicle, TimeType, db, user, user_type, job_status
 from werkzeug.security import generate_password_hash
 
 def _seed_mitarbeiter():
@@ -28,8 +28,8 @@ def seed_database():
     db.session.bulk_save_objects(timeTypes)
 
     fahrzeuge = [
-        Fahrzeug(id=1, name="Fahrzeug1", kennzeichen="BE JW 1"),
-        Fahrzeug(id=2, name="Fahrzeug2", kennzeichen="BE JW 2"),
+        vehicle(id=1, name="Fahrzeug1", kennzeichen="BE JW 1"),
+        vehicle(id=2, name="Fahrzeug2", kennzeichen="BE JW 2"),
     ]
     db.session.bulk_save_objects(fahrzeuge)
 

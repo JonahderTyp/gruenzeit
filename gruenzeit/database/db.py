@@ -43,8 +43,8 @@ class user(db.Model, UserMixin):
         return self.username
 
 
-class Fahrzeug(db.Model):
-    __tablename__ = 'fahrzeug'
+class vehicle(db.Model):
+    __tablename__ = 'vehicle'
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(45), nullable=True)
     kennzeichen = Column(String(45), nullable=True)
@@ -161,14 +161,14 @@ class TimeEntries(db.Model):
         pass
 
 
-class FahrzeugAssignments(db.Model):
-    __tablename__ = 'fahrzeugassignments'
+class user_in_vehicle(db.Model):
+    __tablename__ = 'user_in_vehicle'
     id = Column(Integer, primary_key=True, autoincrement=True)
     date = Column(Date, nullable=False)
-    fahrzeug_id = Column(Integer, ForeignKey('fahrzeug.id'))
+    vehicle_id = Column(Integer, ForeignKey('vehicle.id'))
     user_id = Column(Integer, ForeignKey('user.username'))
-    fahrzeug = relationship('Fahrzeug', backref='assignments')
-    user = relationship('User', backref='vehicle_assignments')
+    vehicle = relationship('vehicle', backref='user_in_vehicle')
+    user = relationship('User', backref='user_in_vehicle')
 
 
 class Bild(db.Model):
