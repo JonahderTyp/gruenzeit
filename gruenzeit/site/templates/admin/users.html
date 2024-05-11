@@ -17,9 +17,9 @@
             <tr>
                 <th scope="row">{{usr.username}}</th>
                 <td>{{usr.name}}</td>
-                <td>{{usr.usertype}}</td>
+                <td>{{usr.user_type}}</td>
                 <td>
-                    <a href="{{ url_for('site.admin.user', username=usr.username) }}">
+                    <a href="{{ url_for('site.admin.getuser', username=usr.username) }}">
                         <i class="bi bi-gear-fill"></i>
                     </a>
                 </td>

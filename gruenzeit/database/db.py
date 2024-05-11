@@ -10,30 +10,30 @@ from typing import List, Dict
 db = SQLAlchemy()
 
 
-class UserType(db.Model):
-    __tablename__ = 'usertype'
+class user_type(db.Model):
+    __tablename__ = 'user_type'
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=True)
-    users = relationship('User', backref='usertype', lazy=True)
+    users = relationship('user', backref='user_type', lazy=True)
 
 
-class User(db.Model, UserMixin):
+class user(db.Model, UserMixin):
     __tablename__ = 'user'
     username = Column(String(255), primary_key=True)
     name = Column(String(255), nullable=True)
     password_hash = Column(String(255), nullable=True)
-    usertype_id = Column(Integer, ForeignKey('usertype.id'), nullable=True)
+    user_type_id = Column(Integer, ForeignKey('user_type.id'), nullable=True)
 
     @staticmethod
-    def createNew(username: str, name: str, password_hash, usertype_id) -> User:
-        if User.query.get(username):
+    def createNew(username: str, name: str, password_hash, user_type_id) -> user:
+        if user.query.get(username):
             raise ElementAlreadyExists(
                 f"User mit dem Benutzernamen \"{username}\" existiert bereits")
-        new_user = User(
+        new_user = user(
             username=username.strip(),
             name=name.strip(),
             password_hash=password_hash,
-            usertype_id=usertype_id
+            user_type_id=user_type_id
         )
         db.session.add(new_user)
         db.session.commit()
@@ -153,7 +153,7 @@ class TimeEntries(db.Model):
         return TimeType.query.get({"id": te.time_type_id})
 
     @staticmethod
-    def getAvailableEntrys(user: User) -> List[TimeType]:
+    def getAvailableEntrys(user: user) -> List[TimeType]:
         types: List[TimeType] = TimeType.query.all()
         current = TimeEntries.getCurrentEntry(user)
         if current is None:

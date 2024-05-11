@@ -4,7 +4,7 @@ from flask import Flask
 from flask_login import LoginManager
 from pathlib import Path
 from .database.seed import seed_database
-from .database.db import User
+from .database.db import user
 
 
 def create_app():
@@ -39,7 +39,7 @@ def create_app():
 
     @login_manager.user_loader
     def user_loader(user_id):
-        return User.query.get(user_id)
+        return user.query.get(user_id)
 
     with app.app_context():
         db.create_all()
