@@ -1,4 +1,4 @@
-from .db import Fahrzeug, TimeType, db, User, UserType, BaustellenStatus
+from .db import Fahrzeug, TimeType, db, User, UserType, job_status
 from werkzeug.security import generate_password_hash
 
 def _seed_mitarbeiter():
@@ -41,9 +41,9 @@ def seed_database():
     db.session.bulk_save_objects(userTypes)
 
     baustellenStatus = [
-        BaustellenStatus(id=1, name="In Planung"),
-        BaustellenStatus(id=2, name="In Bearbeitung"),
-        BaustellenStatus(id=3, name="Abgeschlossen"),
+        job_status(id=1, name="In Planung"),
+        job_status(id=2, name="In Bearbeitung"),
+        job_status(id=3, name="Abgeschlossen"),
     ]
     db.session.bulk_save_objects(baustellenStatus)
 
