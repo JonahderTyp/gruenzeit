@@ -139,7 +139,7 @@ class TimeEntries(db.Model):
     time_type_id = Column(Integer, ForeignKey('timetype.id'))
     job_id = Column(
         Integer, ForeignKey('job.id'))
-    user = relationship('User', backref='time_entries')
+    user = relationship('user', backref='time_entries')
     time_type = relationship('TimeType', backref='time_entries')
     job = relationship('job', backref='time_entries')
 
@@ -168,7 +168,7 @@ class user_in_vehicle(db.Model):
     vehicle_id = Column(Integer, ForeignKey('vehicle.id'))
     user_id = Column(Integer, ForeignKey('user.username'))
     vehicle = relationship('vehicle', backref='user_in_vehicle')
-    user = relationship('User', backref='user_in_vehicle')
+    user = relationship('user', backref='user_in_vehicle')
 
 
 class Bild(db.Model):
