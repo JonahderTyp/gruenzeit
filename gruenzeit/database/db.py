@@ -134,26 +134,34 @@ class job(db.Model):
 class TimeEntries(db.Model):
     __tablename__ = 'timeentries'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    time = Column(DateTime, nullable=True)
+    start_time = Column(DateTime, nullable=True)
+    end_time = Column(DateTime, nullable=True)
     user_id = Column(Integer, ForeignKey('user.username'))
     time_type_id = Column(Integer, ForeignKey('timetype.id'))
-    job_id = Column(
-        Integer, ForeignKey('job.id'))
+    job_id = Column(Integer, ForeignKey('job.id'))
     user = relationship('user', backref='time_entries')
     time_type = relationship('TimeType', backref='time_entries')
     job = relationship('job', backref='time_entries')
 
     @staticmethod
+    def getUnfinishedEntries(usr: user) -> List[TimeEntries]:
+        return TimeEntries.query.filter_by(user_id=usr.get_id(), end_time=None).all()
+
+    @staticmethod
+    @DeprecationWarning
     def getCurrentEntry(user) -> TimeType:
+        raise DeprecationWarning
         te: TimeEntries = TimeEntries.query.filter_by(user=user) \
-            .order_by(TimeEntries.time.desc()) \
+            .order_by(TimeEntries.start_time.desc()) \
             .first()
         if not te:
             return None
         return TimeType.query.get({"id": te.time_type_id})
 
     @staticmethod
+    @DeprecationWarning
     def getAvailableEntrys(user: user) -> List[TimeType]:
+        raise DeprecationWarning
         types: List[TimeType] = TimeType.query.all()
         current = TimeEntries.getCurrentEntry(user)
         if current is None:
