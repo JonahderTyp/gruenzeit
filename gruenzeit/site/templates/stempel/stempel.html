@@ -1,13 +1,58 @@
 {% extends "base.html" %}
 {% block title %}Stempeln{% endblock %}
 {% block content %}
-<h1>Stempeln</h1>
+<!-- <h1>Stempeln</h1>
 <h1>Hallo {{current_user.name}}</h1>
 <h1>Aktuell bist du {{ userstatus }}</h1>
 <h1>Du kannst folgendes Stempeln:
     {% for timetype in useravailable %}
     {{timetype.name}}
-    {%endfor%}</h1>
+    {%endfor%}</h1> -->
+
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Deine Zeitleiste</h2>
+    {% if not userTimesToday %}
+    <div class="alert alert-warning" role="alert">
+        Du hast heute noch keine Zeiten gestempelt.
+    </div>
+    {%else%}
+    {% for userTime in userTimesToday %}
+
+    <!-- FOR DEBUGGING: -->
+    <!-- {{userTime}} -->
+
+    <div class=" card shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title">
+                {{userTime.start_time}} -
+                {% if userTime.end_time %}
+                {{userTime.end_time}}
+                {%else%}
+                jetzt
+                {%endif%}
+                {%if userTime.duration %}
+                ({{userTime.duration}})
+                {%endif%}
+            </h5>
+            <small class="text-muted">
+                {{userTime.timetype.name}}
+            </small>
+            <p class="card-text">
+                {% if userTime.job %}
+                {{userTime.job.name}}
+                {%else%}
+                Keine Baustelle ausgewählt
+                {%endif%}
+            </p>
+            <a class="btn btn-primary" href="#" role="button">Bearbeiten</a>
+        </div>
+    </div>
+    {%endfor%}
+    {%endif%}
+</div>
+
+
 <div class="container py-5">
     <div class="row">
         <div class="col-auto">

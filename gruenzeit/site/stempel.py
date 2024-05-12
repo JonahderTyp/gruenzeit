@@ -6,6 +6,7 @@ from ..database.db import user_type, user, TimeEntries, TimeType, job, job_statu
 from ..database.exceptions import ElementAlreadyExists, ElementDoesNotExsist
 from pprint import pprint
 from datetime import datetime
+from typing import List
 
 stempel_site = Blueprint("stempel", __name__, url_prefix="/stempel")
 
@@ -14,9 +15,23 @@ stempel_site = Blueprint("stempel", __name__, url_prefix="/stempel")
 @login_required
 def overview():
     usr: user = current_user
-    baustellen_active = job.getJobs(job_status.query.get(1))
+    baustellen_active = job.getJobs(job_status.query.get(1)) \
+        + job.getJobs(job_status.query.get(2))
     timetypes = TimeType.getList()
-    userstatus = TimeEntries.getUnfinishedEntries(usr)
+
+    userTimesToday: List[TimeEntries] = TimeEntries.getEntriesToday(usr)
+
+    stempelung: List[dict] = []
+    for entry in userTimesToday:
+        stempelung.append({
+            "start_time": entry.start_time.strftime("%H:%M"),
+            "end_time": entry.end_time.strftime("%H:%M") if entry.end_time else None,
+            "duration": (entry.end_time - entry.start_time) if entry.end_time else None,
+            "timetype": {"name": entry.time_type.name, "id": entry.time_type.id},
+            "job": entry.job.toDict() if entry.job else None,
+        })
+
+    # userstatus = TimeEntries.getUnfinishedEntries(usr)
     current_time = datetime.now()
 
     pprint(timetypes)
@@ -25,7 +40,7 @@ def overview():
     current_minute = (current_time.minute // 15)*15
 
     return render_template("stempel/stempel.html",
-                           userstatus=userstatus,
+                           userTimesToday=stempelung,
                            baustellen=baustellen_active,
                            timetypes=timetypes,
                            currHour=current_hour,
@@ -41,6 +56,7 @@ def start():
         minutes = request.form.get("minutes")
         timetype_id = request.form.get("timetype")
         baustelle_id = request.form.get("baustelle")
+        print(baustelle_id)
         timetype = TimeType.query.get(timetype_id)
         if not hours or not minutes or not timetype:
             return abort(401)
@@ -52,7 +68,8 @@ def start():
         except ValueError:
             return abort(400)
         try:
-            TimeEntries.newEntry(usr, timetype, entry_time, job.getJob(baustelle_id))
+            TimeEntries.newEntry(usr, timetype, entry_time,
+                                 job.getJob(baustelle_id) if baustelle_id else None)
         except ElementAlreadyExists as ex:
             print(ex)
             return abort(400)
