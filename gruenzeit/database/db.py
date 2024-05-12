@@ -205,6 +205,12 @@ class TimeEntries(db.Model, dictable):
         return TimeEntries.query.filter_by(user_id=usr.get_id(), end_time=None).all()
 
     @staticmethod
+    def getEntriesToday(usr: user) -> List[TimeEntries]:
+        return TimeEntries.query.filter_by(user_id=usr.get_id()) \
+            .filter(TimeEntries.start_time >= datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)) \
+            .order_by(TimeEntries.start_time.asc()).all()
+
+    @staticmethod
     @DeprecationWarning
     def getCurrentEntry(user) -> TimeType:
         raise DeprecationWarning
