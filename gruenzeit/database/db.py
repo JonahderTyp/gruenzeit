@@ -4,36 +4,36 @@ from flask_login import UserMixin
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey, Date
 from .exceptions import ElementAlreadyExists, ElementDoesNotExsist
-from typing import List
+from typing import List, Dict
 
 
 db = SQLAlchemy()
 
 
-class UserType(db.Model):
-    __tablename__ = 'usertype'
+class user_type(db.Model):
+    __tablename__ = 'user_type'
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=True)
-    users = relationship('User', backref='usertype', lazy=True)
+    users = relationship('user', backref='user_type', lazy=True)
 
 
-class User(db.Model, UserMixin):
+class user(db.Model, UserMixin):
     __tablename__ = 'user'
     username = Column(String(255), primary_key=True)
     name = Column(String(255), nullable=True)
     password_hash = Column(String(255), nullable=True)
-    usertype_id = Column(Integer, ForeignKey('usertype.id'), nullable=True)
+    user_type_id = Column(Integer, ForeignKey('user_type.id'), nullable=True)
 
     @staticmethod
-    def createNew(username: str, name: str, password_hash, usertype_id) -> User:
-        if User.query.get(username):
+    def createNew(username: str, name: str, password_hash, user_type_id) -> user:
+        if user.query.get(username):
             raise ElementAlreadyExists(
                 f"User mit dem Benutzernamen \"{username}\" existiert bereits")
-        new_user = User(
+        new_user = user(
             username=username.strip(),
             name=name.strip(),
             password_hash=password_hash,
-            usertype_id=usertype_id
+            user_type_id=user_type_id
         )
         db.session.add(new_user)
         db.session.commit()
@@ -43,8 +43,8 @@ class User(db.Model, UserMixin):
         return self.username
 
 
-class Fahrzeug(db.Model):
-    __tablename__ = 'fahrzeug'
+class vehicle(db.Model):
+    __tablename__ = 'vehicle'
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(45), nullable=True)
     kennzeichen = Column(String(45), nullable=True)
@@ -56,36 +56,42 @@ class TimeType(db.Model):
     name = Column(String(45), nullable=True)
 
 
-class BaustellenStatus(db.Model):
-    __tablename__ = 'baustellenstatus'
+class job_status(db.Model):
+    __tablename__ = 'job_status'
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(45), nullable=True)
-    baustellen = relationship('Baustelle', backref='status')
+    jobs = relationship('job', backref='status')
+
+    @staticmethod
+    def getAll() -> dict[int, str]:
+        return {i.id: i.name for i in job_status.query.all()}
 
 
-class Baustelle(db.Model):
-    __tablename__ = 'baustelle'
+class job(db.Model):
+    __tablename__ = 'job'
     id = Column(Integer, primary_key=True, autoincrement=True)
     auftragsnummer = Column(String(), nullable=True)
     name = Column(String(), nullable=True)
     adresse = Column(String(), nullable=True)
     beschreibung = Column(String(), nullable=True)
-    status_id = Column(Integer, ForeignKey('baustellenstatus.id'))
+    status_id = Column(Integer, ForeignKey('job_status.id'))
+    bilder = relationship('Bild', backref='job')
 
     @staticmethod
-    def createNew(auftragsnummer: str, name: str, adresse: str, beschreibung: str) -> Baustelle:
-        new_Baustelle = Baustelle(
+    def createNew(auftragsnummer: str, name: str, adresse: str, beschreibung: str) -> job:
+        new_job = job(
             auftragsnummer=auftragsnummer,
             name=name,
             adresse=adresse,
             beschreibung=beschreibung,
+            status_id=job_status.query.filter_by(name="In Planung").first().id
         )
-        db.session.add(new_Baustelle)
+        db.session.add(new_job)
         db.session.commit()
-        return new_Baustelle
-    
+        return new_job
+
     def set_status(self, status: str):
-        status = BaustellenStatus.query.filter_by(name=status).first()
+        status = job_status.query.filter_by(name=status).first()
         if not status:
             raise ElementDoesNotExsist(
                 f"Status \"{status}\" existiert nicht")
@@ -93,14 +99,25 @@ class Baustelle(db.Model):
         db.session.commit()
 
     @staticmethod
-    def getBaustelleHTML(id: int) -> Baustelle:
-        bst: Baustelle = Baustelle.query.get(id)
+    def getJob(id: int) -> job:
+        bst: job = job.query.get(id)
         if not bst:
             raise ElementDoesNotExsist(
-                f"Baustelle mit der ID {id} existiert nicht")
-        bst.beschreibung = str(bst.beschreibung).split("\n")
+                f"Job mit der ID {id} existiert nicht")
         return bst
-    
+
+    def toHTML(self):
+        bst = {
+            "id": self.id,
+            "auftragsnummer": self.auftragsnummer,
+            "name": self.name,
+            "adresse": self.adresse,
+            "beschreibung": str(self.beschreibung).split("\n"),
+            "status": job_status.query.get(self.status_id).name,
+            "bilder": [i.bild for i in self.bilder]
+        }
+        return bst
+
     def edit(self, auftragsnummer: str, name: str, adresse: str, beschreibung: str):
         db.session.add(self)
         self.auftragsnummer = auftragsnummer
@@ -113,29 +130,38 @@ class Baustelle(db.Model):
         db.session.delete(self)
         db.session.commit()
 
+
 class TimeEntries(db.Model):
     __tablename__ = 'timeentries'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    time = Column(DateTime, nullable=True)
+    start_time = Column(DateTime, nullable=True)
+    end_time = Column(DateTime, nullable=True)
     user_id = Column(Integer, ForeignKey('user.username'))
     time_type_id = Column(Integer, ForeignKey('timetype.id'))
-    baustelle_id = Column(
-        Integer, ForeignKey('baustelle.id'))
-    user = relationship('User', backref='time_entries')
+    job_id = Column(Integer, ForeignKey('job.id'))
+    user = relationship('user', backref='time_entries')
     time_type = relationship('TimeType', backref='time_entries')
-    baustelle = relationship('Baustelle', backref='time_entries')
+    job = relationship('job', backref='time_entries')
 
     @staticmethod
+    def getUnfinishedEntries(usr: user) -> List[TimeEntries]:
+        return TimeEntries.query.filter_by(user_id=usr.get_id(), end_time=None).all()
+
+    @staticmethod
+    @DeprecationWarning
     def getCurrentEntry(user) -> TimeType:
+        raise DeprecationWarning
         te: TimeEntries = TimeEntries.query.filter_by(user=user) \
-            .order_by(TimeEntries.time.desc()) \
+            .order_by(TimeEntries.start_time.desc()) \
             .first()
         if not te:
             return None
         return TimeType.query.get({"id": te.time_type_id})
 
     @staticmethod
-    def getAvailableEntrys(user: User) -> List[TimeType]:
+    @DeprecationWarning
+    def getAvailableEntrys(user: user) -> List[TimeType]:
+        raise DeprecationWarning
         types: List[TimeType] = TimeType.query.all()
         current = TimeEntries.getCurrentEntry(user)
         if current is None:
@@ -143,19 +169,18 @@ class TimeEntries(db.Model):
         pass
 
 
-class FahrzeugAssignments(db.Model):
-    __tablename__ = 'fahrzeugassignments'
+class user_in_vehicle(db.Model):
+    __tablename__ = 'user_in_vehicle'
     id = Column(Integer, primary_key=True, autoincrement=True)
     date = Column(Date, nullable=False)
-    fahrzeug_id = Column(Integer, ForeignKey('fahrzeug.id'))
+    vehicle_id = Column(Integer, ForeignKey('vehicle.id'))
     user_id = Column(Integer, ForeignKey('user.username'))
-    fahrzeug = relationship('Fahrzeug', backref='assignments')
-    user = relationship('User', backref='vehicle_assignments')
+    vehicle = relationship('vehicle', backref='user_in_vehicle')
+    user = relationship('user', backref='user_in_vehicle')
 
 
 class Bild(db.Model):
     __tablename__ = 'bild'
     id = Column(Integer, primary_key=True, autoincrement=True)
     bild = Column(String(), nullable=True)
-    baustellen_id = Column(Integer, ForeignKey('baustelle.id'))
-    baustellen = relationship('Baustelle', backref='bilder')
+    job_id = Column(Integer, ForeignKey('job.id'))

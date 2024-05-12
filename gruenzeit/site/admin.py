@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, abort
 from flask_login import current_user
 from flask_login.utils import login_required, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
-from ..database.db import UserType, User
+from ..database.db import user_type, user
 from ..database.exceptions import ElementAlreadyExists, ElementDoesNotExsist
 from pprint import pprint
 
@@ -12,8 +12,8 @@ admin_site = Blueprint("admin", __name__, url_prefix="/admin")
 @admin_site.before_request
 @login_required
 def auth():
-    usr: User = current_user
-    if not usr.usertype_id == 1:
+    usr: user = current_user
+    if not usr.user_type_id == 1:
         abort(401)
 
 
@@ -25,7 +25,7 @@ def admin():
 @admin_site.route("/adduser", methods=["GET", "POST"])
 def addUser():
     error_message = None
-    types = UserType.query.all()
+    types = user_type.query.all()
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         name = request.form.get("name", "").strip()
@@ -33,7 +33,7 @@ def addUser():
         usertype = request.form.get("usertype", "")
         if username and name and password and usertype:
             try:
-                newUser = User.createNew(
+                newUser = user.createNew(
                     username, name, generate_password_hash(password), usertype)
                 return redirect(url_for(".user", username=newUser.username))
             except ElementAlreadyExists as ex:
@@ -45,17 +45,17 @@ def addUser():
 
 @admin_site.get("/users")
 def users():
-    usertypes = UserType.query.all()
+    usertypes = user_type.query.all()
     print(usertypes)
-    user = [i.__dict__ for i in User.query.all()]
-    for usr in user:
-        usr["usertype"] = UserType.query.get(usr['usertype_id']).name
+    users = [i.__dict__ for i in user.query.all()]
+    for usr in users:
+        usr["user_type"] = user_type.query.get(usr['user_type_id']).name
 
     pprint(user)
     return render_template("admin/users.html", user=user)
 
 
 @admin_site.get("/users/<username>")
-def user(username):
-    user: User = User.query.get(username)
-    return render_template("admin/user.html", user=user)
+def getuser(username):
+    usr: user = user.query.get(username)
+    return render_template("admin/user.html", user=usr)

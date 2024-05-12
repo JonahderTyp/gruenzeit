@@ -2,25 +2,25 @@ from flask import Blueprint, render_template, request, redirect, url_for
 from flask_login import current_user
 from flask_login.utils import login_required, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
-from ..database.db import User
+from ..database.db import user
 from .admin import admin_site
 from .benutzer import benutzer_site
-from .leitung import leitung_site
+from .baustelle import baustelle_site
 
 site = Blueprint("site", __name__, template_folder="templates", url_prefix="/")
 
 site.register_blueprint(admin_site)
 site.register_blueprint(benutzer_site)
-site.register_blueprint(leitung_site)
+site.register_blueprint(baustelle_site)
 
 
 @site.context_processor
 def inject_views():
     if not current_user.is_authenticated:
         return {"views": []}
-    usr: User = current_user
+    usr: user = current_user
     views = []
-    if usr.usertype_id == 1:
+    if usr.user_type_id == 1:
         views.append({"name": "Einstellungen",
                       "multi": [{"name": "admin",
                                  "url": url_for("site.admin.admin")},
@@ -29,11 +29,10 @@ def inject_views():
                                 {"name": "Neuer Benutzer",
                                  "url": url_for("site.admin.addUser")},
                                 ]})
-    if usr.usertype_id <= 2:
-        views.append({"name": "Geschäftsleitung",
-                      "multi": [{"name": "Baustellen",
-                                 "url": url_for("site.leitung.baustellen")}]})
-    if usr.usertype_id <= 3:
+    if usr.user_type_id <= 2:
+        views.append({"name": "Baustellen",
+                      "url": url_for("site.baustelle.baustellen")})
+    if usr.user_type_id <= 3:
         views.append({"name": "Stempeln",
                       "url": url_for("site.benutzer.stempeln")})
     views.append({"name": "Logout",
@@ -56,15 +55,15 @@ def login():
     if request.method == "POST":
         username = request.form["username"].strip()
         password = request.form["password"].strip()
-        user: User = User.query.filter_by(username=username).first()
+        usr: user = user.query.filter_by(username=username).first()
         # print("Username:", username)
-        print("User:", user)
+        print("User:", usr)
         # print("password:", password)
         # print("passwordHash:", user.password_hash)
-        if user and check_password_hash(user.password_hash, password):
-            login_user(user)
+        if user and check_password_hash(usr.password_hash, password):
+            login_user(usr, remember=True)
             # Log user ID to verify
-            print("login successful, user id:", user.username)
+            print("login successful, user id:", usr.username)
             return redirect(url_for('.home'))
         else:
             print("login failed")
@@ -91,12 +90,12 @@ def register():
         password = request.form["password"]
 
         # Check if the name already exists
-        existing_user = User.query.filter_by(name=name).first()
+        existing_user = user.query.filter_by(name=name).first()
         if existing_user:
             return render_template("register.html", error="Name already taken")
 
         # Create new user
-        User.createNew(name, generate_password_hash(password))
+        user.createNew(name, generate_password_hash(password))
         # Redirect to the login page after successful registration
         return redirect(url_for('site.login'))
 

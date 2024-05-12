@@ -1,8 +1,8 @@
-from .db import Fahrzeug, TimeType, db, User, UserType, BaustellenStatus
+from .db import vehicle, TimeType, db, user, user_type, job_status
 from werkzeug.security import generate_password_hash
 
 def _seed_mitarbeiter():
-    mitarbeiter = [User(name=n) for n in [
+    mitarbeiter = [user(name=n) for n in [
         "Lena Schröder",
         "Tobias Müller",
         "Katharina Vogel",
@@ -28,27 +28,27 @@ def seed_database():
     db.session.bulk_save_objects(timeTypes)
 
     fahrzeuge = [
-        Fahrzeug(id=1, name="Fahrzeug1", kennzeichen="BE JW 1"),
-        Fahrzeug(id=2, name="Fahrzeug2", kennzeichen="BE JW 2"),
+        vehicle(id=1, name="Fahrzeug1", kennzeichen="BE JW 1"),
+        vehicle(id=2, name="Fahrzeug2", kennzeichen="BE JW 2"),
     ]
     db.session.bulk_save_objects(fahrzeuge)
 
     userTypes = [
-        UserType(id=1, name="admin"),
-        UserType(id=2, name="Geschäftsführer"),
-        UserType(id=3, name="Mitarbeiter"),
+        user_type(id=1, name="admin"),
+        user_type(id=2, name="Geschäftsführer"),
+        user_type(id=3, name="Mitarbeiter"),
     ]
     db.session.bulk_save_objects(userTypes)
 
     baustellenStatus = [
-        BaustellenStatus(id=1, name="In Planung"),
-        BaustellenStatus(id=2, name="In Bearbeitung"),
-        BaustellenStatus(id=3, name="Abgeschlossen"),
+        job_status(id=1, name="In Planung"),
+        job_status(id=2, name="In Bearbeitung"),
+        job_status(id=3, name="Abgeschlossen"),
     ]
     db.session.bulk_save_objects(baustellenStatus)
 
     # _seed_mitarbeiter()
 
-    User.createNew("admin", "admin", generate_password_hash("admin"), 1)
+    user.createNew("admin", "admin", generate_password_hash("admin"), 1)
 
     db.session.commit()
