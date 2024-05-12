@@ -5,7 +5,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from ..database.db import user_type, user, TimeEntries, TimeType, job, job_status
 from ..database.exceptions import ElementAlreadyExists, ElementDoesNotExsist
 from pprint import pprint
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List
 
 stempel_site = Blueprint("stempel", __name__, url_prefix="/stempel")
@@ -23,10 +23,15 @@ def overview():
 
     stempelung: List[dict] = []
     for entry in userTimesToday:
+        if entry.start_time:
+            duration: timedelta = (
+                (entry.end_time if entry.end_time else datetime.now()) - entry.start_time)
+
         stempelung.append({
+            "id": entry.id,
             "start_time": entry.start_time.strftime("%H:%M"),
             "end_time": entry.end_time.strftime("%H:%M") if entry.end_time else None,
-            "duration": (entry.end_time - entry.start_time) if entry.end_time else None,
+            "duration": f"{str(duration).split('.')[0][:-3]}" if duration and duration.total_seconds() > 0 else None,
             "timetype": {"name": entry.time_type.name, "id": entry.time_type.id},
             "job": entry.job.toDict() if entry.job else None,
         })
@@ -45,6 +50,14 @@ def overview():
                            timetypes=timetypes,
                            currHour=current_hour,
                            currMin=current_minute)
+
+
+@stempel_site.route("/edit/<int:id>", methods=["GET", "POST"])
+def edit(id):
+    usr: user = current_user
+    if request.method == "POST":
+        pass
+    return render_template("stempel/edit.html")
 
 
 @stempel_site.route("/start", methods=["POST"])
