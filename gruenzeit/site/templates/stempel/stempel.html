@@ -10,55 +10,57 @@
     {%endfor%}</h1> -->
 
 
-<div class="container mt-5">
-    <h2 class="text-center mb-4">Deine Zeitleiste</h2>
-    {% if not userTimesToday %}
-    <div class="alert alert-warning" role="alert">
-        Du hast heute noch keine Zeiten gestempelt.
-    </div>
-    {%else%}
-    {% for userTime in userTimesToday %}
 
-    <!-- FOR DEBUGGING: -->
-    <!-- {{userTime}} -->
-
-    <div class=" card shadow-sm">
-        <div class="card-body">
-            <h5 class="card-title">
-                {{userTime.start_time}} -
-                {% if userTime.end_time %}
-                {{userTime.end_time}}
-                {%else%}
-                jetzt
-                {%endif%}
-                {%if userTime.duration %}
-                ({{userTime.duration}})
-                {%endif%}
-            </h5>
-            <small class="text-muted">
-                {{userTime.timetype.name}}
-            </small>
-            <p class="card-text">
-                {% if userTime.job %}
-                {{userTime.job.name}}
-                {%else%}
-                Keine Baustelle ausgewählt
-                {%endif%}
-            </p>
-            <a class="btn btn-primary" href="#" role="button">Bearbeiten</a>
-        </div>
-    </div>
-    {%endfor%}
-    {%endif%}
+<h2 class="text-center mb-2 mt-1">Deine Zeitleiste</h2>
+{% if not userTimesToday %}
+<div class="alert alert-warning" role="alert">
+    Du hast heute noch keine Zeiten gestempelt.
 </div>
+{%else%}
+{% for userTime in userTimesToday %}
+
+<!-- FOR DEBUGGING: -->
+<!-- {{userTime}} -->
+
+<div class="card shadow-sm mb-1">
+    <div class="card-body">
+        <h5 class="card-title">
+            {{userTime.start_time}} -
+            {% if userTime.end_time %}
+            {{userTime.end_time}}
+            {%else%}
+            jetzt
+            {%endif%}
+            {%if userTime.duration %}
+            ({{userTime.duration}})
+            {%endif%}
+        </h5>
+        <small class="text-muted">
+            {{userTime.timetype.name}}
+        </small>
+        <p class="card-text">
+            {% if userTime.job %}
+            {{userTime.job.name}}
+            {%else%}
+            Keine Baustelle ausgewählt
+            {%endif%}
+        </p>
+        <a class="btn btn-primary" href="{{ url_for('site.stempel.edit', id=userTime.id)}}" role="button">Bearbeiten</a>
+    </div>
+</div>
+{%endfor%}
+{%endif%}
 
 
-<div class="container py-5">
-    <div class="row">
-        <div class="col-auto">
+
+<div class="py-5">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Neue Zeit Stempeln</h5>
             <form action="{{ url_for('site.stempel.start')}}" id="timeForm" method="post">
-                <div class="table-responsive">
-                    <table>
+                <label for="timeTable">Uhrzeit:</label>
+                <div class="table-responsive mb-3" id="timeTable">
+                    <table class="w-100">
                         <tbody>
                             <tr>
                                 <td scope="row">
@@ -72,11 +74,11 @@
                             </tr>
                             <tr>
                                 <td scope="row">
-                                    <input type="text" class="form-control" id="hours" name="hours"
+                                    <input type="text" class="form-control text-center" id="hours" name="hours"
                                         value="{% if currHour %} {{currHour}} {%else%} 12 {%endif%}" readonly>
                                 </td>
                                 <td>
-                                    <input type="text" class="form-control" id="minutes" name="minutes"
+                                    <input type="text" class="form-control text-center" id="minutes" name="minutes"
                                         value="{% if currMin %} {{currMin}} {%else%} 0 {%endif%}" readonly>
                                 </td>
                             </tr>
@@ -93,19 +95,18 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="mb-3">
-                    <label for="timetype">Select an option:</label>
-                    <select class="form-control" id="timetype" name="timetype">
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="timetype">Typ</span>
+                    <select class="form-select" id="timetype" name="timetype" aria-label="timetype">
                         {% for timetype in timetypes %}
                         <option value="{{timetype.id}}">{{timetype.name}}</option>
                         {%endfor%}
                     </select>
                 </div>
 
-                <div class="mb-3">
-
-                    <label for="baustelle">Select an option:</label>
-                    <select class="form-select" name="baustelle" id="baustelle" aria-label="Default select example"
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="baustelle">Baustelle</span>
+                    <select class="form-select" name="baustelle" id="baustelle" aria-label="baustelle"
                         aria-describedby="baustelle">
 
                         <option selected value="">Keine</option>
@@ -113,8 +114,6 @@
                         <option value="{{baustelle.id}}">{{baustelle.name}}</option>
                         {%endfor%}
                     </select>
-
-                    <small id="baustelle" class="text-muted">Optional</small>
                 </div>
 
                 <div class="d-grid gap-2 mt-3">
