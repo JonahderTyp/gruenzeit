@@ -4,13 +4,13 @@ from flask_login.utils import login_required, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 from ..database.db import user
 from .admin import admin_site
-from .benutzer import benutzer_site
+from .stempel import stempel_site
 from .baustelle import baustelle_site
 
 site = Blueprint("site", __name__, template_folder="templates", url_prefix="/")
 
 site.register_blueprint(admin_site)
-site.register_blueprint(benutzer_site)
+site.register_blueprint(stempel_site)
 site.register_blueprint(baustelle_site)
 
 
@@ -34,7 +34,7 @@ def inject_views():
                       "url": url_for("site.baustelle.baustellen")})
     if usr.user_type_id <= 3:
         views.append({"name": "Stempeln",
-                      "url": url_for("site.benutzer.stempeln")})
+                      "url": url_for("site.stempel.overview")})
     views.append({"name": "Logout",
                   "url": url_for("site.logout")})
     return {"views": views}

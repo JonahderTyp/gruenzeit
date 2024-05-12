@@ -20,10 +20,8 @@ def _seed_mitarbeiter():
 def seed_database():
     print("Seeding Database")
     timeTypes = [
-        TimeType(id=1, name="Arbeit-beginn"),
-        TimeType(id=2, name="Pause-beginn"),
-        TimeType(id=3, name="Pause-ende"),
-        TimeType(id=4, name="Arbeit-ende"),
+        TimeType(id=1, name="Arbeit"),
+        TimeType(id=2, name="Pause"),
     ]
     db.session.bulk_save_objects(timeTypes)
 

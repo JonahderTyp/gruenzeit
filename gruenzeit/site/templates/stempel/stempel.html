@@ -11,7 +11,7 @@
 <div class="container py-5">
     <div class="row">
         <div class="col-auto">
-            <form id="timeForm">
+            <form action="{{ url_for('site.stempel.start')}}" id="timeForm" method="post">
                 <div class="table-responsive">
                     <table>
                         <tbody>
@@ -48,6 +48,30 @@
                         </tbody>
                     </table>
                 </div>
+                <div class="mb-3">
+                    <label for="timetype">Select an option:</label>
+                    <select class="form-control" id="timetype" name="timetype">
+                        {% for timetype in timetypes %}
+                        <option value="{{timetype.id}}">{{timetype.name}}</option>
+                        {%endfor%}
+                    </select>
+                </div>
+
+                <div class="mb-3">
+
+                    <label for="baustelle">Select an option:</label>
+                    <select class="form-select" name="baustelle" id="baustelle" aria-label="Default select example"
+                        aria-describedby="baustelle">
+
+                        <option selected value="">Keine</option>
+                        {% for baustelle in baustellen %}
+                        <option value="{{baustelle.id}}">{{baustelle.name}}</option>
+                        {%endfor%}
+                    </select>
+
+                    <small id="baustelle" class="text-muted">Optional</small>
+                </div>
+
                 <div class="d-grid gap-2 mt-3">
                     <button type="submit" class="btn btn-primary">Submit Time</button>
                 </div>
