@@ -1,7 +1,7 @@
 from __future__ import annotations
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm import relationship, backref, Mapped
 from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey, Date
 from .exceptions import ElementAlreadyExists, ElementDoesNotExsist
 from typing import List, Dict
@@ -148,14 +148,14 @@ class job(db.Model, dictable):
 class TimeEntries(db.Model, dictable):
     __tablename__ = 'timeentries'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    start_time = Column(DateTime, nullable=True)
-    end_time = Column(DateTime, nullable=True)
+    start_time: datetime = Column(DateTime, nullable=True)
+    end_time: datetime = Column(DateTime, nullable=True)
     user_id = Column(Integer, ForeignKey('user.username'))
     time_type_id = Column(Integer, ForeignKey('timetype.id'))
     job_id = Column(Integer, ForeignKey('job.id'))
-    user = relationship('user', backref='time_entries')
-    time_type = relationship('TimeType', backref='time_entries')
-    job = relationship('job', backref='time_entries')
+    user: Mapped[user] = relationship('user', backref='time_entries')
+    time_type: Mapped[TimeType] = relationship('TimeType', backref='time_entries')
+    job: Mapped[job] = relationship('job', backref='time_entries')
 
     @staticmethod
     def newEntry(user: user, time_type: TimeType, start_time: datetime = None, job: job = None) -> TimeEntries:
