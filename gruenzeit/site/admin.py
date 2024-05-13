@@ -51,8 +51,8 @@ def users():
     for usr in users:
         usr["user_type"] = user_type.query.get(usr['user_type_id']).name
 
-    pprint(user)
-    return render_template("admin/users.html", user=user)
+    pprint(users)
+    return render_template("admin/users.html", user=users)
 
 
 @admin_site.get("/users/<username>")
