@@ -140,6 +140,7 @@ class TimeEntries(db.Model, dictable):
     id = Column(Integer, primary_key=True, autoincrement=True)
     start_time: datetime = Column(DateTime, nullable=True)
     end_time: datetime = Column(DateTime, nullable=True)
+    pause_time: int = Column(Integer, nullable=True)    # in minutes
     user_id = Column(Integer, ForeignKey('user.username'))
     job_id = Column(Integer, ForeignKey('job.id'))
     user: Mapped[user] = relationship('user', backref='time_entries')
