@@ -56,16 +56,6 @@ class vehicle(db.Model, dictable):
     kennzeichen = Column(String(45), nullable=True)
 
 
-class TimeType(db.Model, dictable):
-    __tablename__ = 'timetype'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(45), nullable=True)
-
-    @staticmethod
-    def getList() -> List[TimeType]:
-        return TimeType.query.all()
-
-
 class job_status(db.Model, dictable):
     __tablename__ = 'job_status'
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -151,20 +141,17 @@ class TimeEntries(db.Model, dictable):
     start_time: datetime = Column(DateTime, nullable=True)
     end_time: datetime = Column(DateTime, nullable=True)
     user_id = Column(Integer, ForeignKey('user.username'))
-    time_type_id = Column(Integer, ForeignKey('timetype.id'))
     job_id = Column(Integer, ForeignKey('job.id'))
     user: Mapped[user] = relationship('user', backref='time_entries')
-    time_type: Mapped[TimeType] = relationship('TimeType', backref='time_entries')
     job: Mapped[job] = relationship('job', backref='time_entries')
 
     @staticmethod
-    def newEntry(user: user, time_type: TimeType, start_time: datetime = None, job: job = None) -> TimeEntries:
+    def newEntry(user: user, start_time: datetime = None, job: job = None) -> TimeEntries:
         """
         Creates a new time entry in the database.
 
         Args:
             user (user): The user associated with the time entry.
-            time_type (TimeType): The type of time entry.
             start_time (datetime, optional): The start time of the entry. Defaults to None.
             job (job, optional): The job associated with the time entry. Defaults to None.
 
@@ -174,12 +161,11 @@ class TimeEntries(db.Model, dictable):
         Raises:
             ValueError: If not all required arguments are set.
         """
-        if not user or not time_type or not start_time:
+        if not user or not start_time:
             raise ValueError("Not all required arguments are set")
 
         new_entry = TimeEntries(
             user_id=user.get_id(),
-            time_type_id=time_type.id,
             start_time=start_time,
             job_id=job.id if job else None
         )
@@ -209,26 +195,6 @@ class TimeEntries(db.Model, dictable):
         return TimeEntries.query.filter_by(user_id=usr.get_id()) \
             .filter(TimeEntries.start_time >= datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)) \
             .order_by(TimeEntries.start_time.asc()).all()
-
-    @staticmethod
-    @DeprecationWarning
-    def getCurrentEntry(user) -> TimeType:
-        raise DeprecationWarning
-        te: TimeEntries = TimeEntries.query.filter_by(user=user) \
-            .order_by(TimeEntries.start_time.desc()) \
-            .first()
-        if not te:
-            return None
-        return TimeType.query.get({"id": te.time_type_id})
-
-    @staticmethod
-    def getAvailableEntrys(user: user) -> List[TimeType]:
-        raise DeprecationWarning
-        types: List[TimeType] = TimeType.query.all()
-        current = TimeEntries.getCurrentEntry(user)
-        if current is None:
-            return [i for i in types if "beginn" in str(i.name).lower()]
-        pass
 
 
 class user_in_vehicle(db.Model, dictable):
