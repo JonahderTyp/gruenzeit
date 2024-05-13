@@ -1,23 +1,29 @@
 from __future__ import annotations
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm import relationship, backref, Mapped
 from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey, Date
 from .exceptions import ElementAlreadyExists, ElementDoesNotExsist
 from typing import List, Dict
+from datetime import datetime
 
 
 db = SQLAlchemy()
 
 
-class user_type(db.Model):
+class dictable:
+    def toDict(self) -> dict:
+        return {i: getattr(self, i) for i in self.__table__.columns.keys()}
+
+
+class user_type(db.Model, dictable):
     __tablename__ = 'user_type'
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=True)
     users = relationship('user', backref='user_type', lazy=True)
 
 
-class user(db.Model, UserMixin):
+class user(db.Model, UserMixin, dictable):
     __tablename__ = 'user'
     username = Column(String(255), primary_key=True)
     name = Column(String(255), nullable=True)
@@ -43,20 +49,24 @@ class user(db.Model, UserMixin):
         return self.username
 
 
-class vehicle(db.Model):
+class vehicle(db.Model, dictable):
     __tablename__ = 'vehicle'
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(45), nullable=True)
     kennzeichen = Column(String(45), nullable=True)
 
 
-class TimeType(db.Model):
+class TimeType(db.Model, dictable):
     __tablename__ = 'timetype'
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(45), nullable=True)
 
+    @staticmethod
+    def getList() -> List[TimeType]:
+        return TimeType.query.all()
 
-class job_status(db.Model):
+
+class job_status(db.Model, dictable):
     __tablename__ = 'job_status'
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(45), nullable=True)
@@ -67,7 +77,7 @@ class job_status(db.Model):
         return {i.id: i.name for i in job_status.query.all()}
 
 
-class job(db.Model):
+class job(db.Model, dictable):
     __tablename__ = 'job'
     id = Column(Integer, primary_key=True, autoincrement=True)
     auftragsnummer = Column(String(), nullable=True)
@@ -106,6 +116,10 @@ class job(db.Model):
                 f"Job mit der ID {id} existiert nicht")
         return bst
 
+    @staticmethod
+    def getJobs(status: job_status) -> List[job]:
+        return job.query.filter_by(status_id=status.id).all()
+
     def toHTML(self):
         bst = {
             "id": self.id,
@@ -131,21 +145,70 @@ class job(db.Model):
         db.session.commit()
 
 
-class TimeEntries(db.Model):
+class TimeEntries(db.Model, dictable):
     __tablename__ = 'timeentries'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    start_time = Column(DateTime, nullable=True)
-    end_time = Column(DateTime, nullable=True)
+    start_time: datetime = Column(DateTime, nullable=True)
+    end_time: datetime = Column(DateTime, nullable=True)
     user_id = Column(Integer, ForeignKey('user.username'))
     time_type_id = Column(Integer, ForeignKey('timetype.id'))
     job_id = Column(Integer, ForeignKey('job.id'))
-    user = relationship('user', backref='time_entries')
-    time_type = relationship('TimeType', backref='time_entries')
-    job = relationship('job', backref='time_entries')
+    user: Mapped[user] = relationship('user', backref='time_entries')
+    time_type: Mapped[TimeType] = relationship('TimeType', backref='time_entries')
+    job: Mapped[job] = relationship('job', backref='time_entries')
+
+    @staticmethod
+    def newEntry(user: user, time_type: TimeType, start_time: datetime = None, job: job = None) -> TimeEntries:
+        """
+        Creates a new time entry in the database.
+
+        Args:
+            user (user): The user associated with the time entry.
+            time_type (TimeType): The type of time entry.
+            start_time (datetime, optional): The start time of the entry. Defaults to None.
+            job (job, optional): The job associated with the time entry. Defaults to None.
+
+        Returns:
+            TimeEntries: The newly created time entry.
+
+        Raises:
+            ValueError: If not all required arguments are set.
+        """
+        if not user or not time_type or not start_time:
+            raise ValueError("Not all required arguments are set")
+
+        new_entry = TimeEntries(
+            user_id=user.get_id(),
+            time_type_id=time_type.id,
+            start_time=start_time,
+            job_id=job.id if job else None
+        )
+        print("New Entry", new_entry.toDict())
+        db.session.add(new_entry)
+        db.session.commit()
+        return new_entry
+
+    @staticmethod
+    def getEntry(id: int) -> TimeEntries:
+        te: TimeEntries = TimeEntries.query.get(id)
+        if not te:
+            raise ElementDoesNotExsist(
+                f"TimeEntry mit der ID {id} existiert nicht")
+        return te
+
+    def end(self):
+        self.end_time = datetime.now()
+        db.session.commit()
 
     @staticmethod
     def getUnfinishedEntries(usr: user) -> List[TimeEntries]:
         return TimeEntries.query.filter_by(user_id=usr.get_id(), end_time=None).all()
+
+    @staticmethod
+    def getEntriesToday(usr: user) -> List[TimeEntries]:
+        return TimeEntries.query.filter_by(user_id=usr.get_id()) \
+            .filter(TimeEntries.start_time >= datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)) \
+            .order_by(TimeEntries.start_time.asc()).all()
 
     @staticmethod
     @DeprecationWarning
@@ -159,7 +222,6 @@ class TimeEntries(db.Model):
         return TimeType.query.get({"id": te.time_type_id})
 
     @staticmethod
-    @DeprecationWarning
     def getAvailableEntrys(user: user) -> List[TimeType]:
         raise DeprecationWarning
         types: List[TimeType] = TimeType.query.all()
@@ -169,7 +231,7 @@ class TimeEntries(db.Model):
         pass
 
 
-class user_in_vehicle(db.Model):
+class user_in_vehicle(db.Model, dictable):
     __tablename__ = 'user_in_vehicle'
     id = Column(Integer, primary_key=True, autoincrement=True)
     date = Column(Date, nullable=False)
@@ -179,7 +241,7 @@ class user_in_vehicle(db.Model):
     user = relationship('user', backref='user_in_vehicle')
 
 
-class Bild(db.Model):
+class Bild(db.Model, dictable):
     __tablename__ = 'bild'
     id = Column(Integer, primary_key=True, autoincrement=True)
     bild = Column(String(), nullable=True)
