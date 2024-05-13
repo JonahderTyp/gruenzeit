@@ -1,0 +1,44 @@
+{% macro build_timeinput(hourID, minuteID, currHour, currMin) %}
+<table class="w-100">
+    <tbody>
+        <tr>
+            <td scope="row">
+                <button type="button" class="btn btn-outline-secondary w-100"
+                    onclick="changeTime('hours', 1, '{{ hourID }}', '{{ minuteID }}')">
+                    <i class="bi bi-arrow-up"></i>
+                </button>
+            </td>
+            <td>
+                <button type="button" class="btn btn-outline-secondary w-100"
+                    onclick="changeTime('minutes', 15, '{{ hourID }}', '{{ minuteID }}')">
+                    <i class="bi bi-arrow-up"></i>
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td scope="row">
+                <input type="text" class="form-control text-center" id="{{ hourID }}" name="hours"
+                    value="{% if currHour %}{{ currHour }}{% else %}12{% endif %}" readonly>
+            </td>
+            <td>
+                <input type="text" class="form-control text-center" id="{{ minuteID }}" name="minutes"
+                    value="{% if currMin %}{{ currMin }}{% else %}0{% endif %}" readonly>
+            </td>
+        </tr>
+        <tr>
+            <td scope="row">
+                <button type="button" class="btn btn-outline-secondary w-100"
+                    onclick="changeTime('hours', -1, '{{ hourID }}', '{{ minuteID }}')">
+                    <i class="bi bi-arrow-down"></i>
+                </button>
+            </td>
+            <td>
+                <button type="button" class="btn btn-outline-secondary w-100"
+                    onclick="changeTime('minutes', -15, '{{ hourID }}', '{{ minuteID }}')">
+                    <i class="bi bi-arrow-down"></i>
+                </button>
+            </td>
+        </tr>
+    </tbody>
+</table>
+{% endmacro %}
