@@ -2,15 +2,6 @@
 {% block title %}Stempeln{% endblock %}
 {% from "stempel/timetable.html" import build_timeinput %}
 {% block content %}
-<!-- <h1>Stempeln</h1>
-<h1>Hallo {{current_user.name}}</h1>
-<h1>Aktuell bist du {{ userstatus }}</h1>
-<h1>Du kannst folgendes Stempeln:
-    {% for timetype in useravailable %}
-    {{timetype.name}}
-    {%endfor%}</h1> -->
-
-
 <!-- Nav tabs -->
 <ul class="nav nav-tabs" id="myTab" role="tablist">
     <li class="nav-item" role="presentation">
@@ -62,7 +53,7 @@
                     {%endif%}
                 </h5>
                 <small class="text-muted">
-                    {{userTime.timetype.name}}
+                    
                 </small>
                 <p class="card-text">
                     {% if userTime.job %}
@@ -93,15 +84,6 @@
                         <div class="table-responsive mb-3" id="timeTable">
                             {{ build_timeinput('startHour', 'startMinute', currHour, currMin) }}
                         </div>
-                        <div class="input-group mb-3">
-                            <span class="input-group-text" id="timetype">Typ</span>
-                            <select class="form-select" id="timetype" name="timetype" aria-label="timetype">
-                                {% for timetype in timetypes %}
-                                <option value="{{timetype.id}}">{{timetype.name}}</option>
-                                {%endfor%}
-                            </select>
-                        </div>
-
                         <div class="input-group mb-3">
                             <span class="input-group-text" id="baustelle">Baustelle</span>
                             <select class="form-select" name="baustelle" id="baustelle" aria-label="baustelle"
@@ -143,15 +125,6 @@
                     <div class="table-responsive mb-3" id="timeTable">
                         {{ build_timeinput('startHourID'~userTime.id, 'startMinuteID'~userTime.id, currHour, currMin)}}
                     </div>
-                    <div class="input-group mb-3">
-                        <span class="input-group-text" id="timetype">Typ</span>
-                        <select class="form-select" id="timetype" name="timetype" aria-label="timetype">
-                            {% for timetype in timetypes %}
-                            <option value="{{timetype.id}}">{{timetype.name}}</option>
-                            {%endfor%}
-                        </select>
-                    </div>
-
                     <div class="input-group mb-3">
                         <span class="input-group-text" id="baustelle">Baustelle</span>
                         <select class="form-select" name="baustelle" id="baustelle" aria-label="baustelle"

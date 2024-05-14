@@ -66,7 +66,7 @@ def start():
         print(request.form)
         hours = request.form.get("hours")
         minutes = request.form.get("minutes")
-        timetype_id = request.form.get("timetype")
+        # timetype_id = request.form.get("timetype")
         baustelle_id = request.form.get("baustelle")
         print(baustelle_id)
         if not hours or not minutes:
