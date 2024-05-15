@@ -9,6 +9,9 @@
                 </button>
             </td>
             <td>
+                <!-- placeholder -->
+            </td>
+            <td>
                 <button type="button" class="btn btn-outline-secondary w-100"
                     onclick="changeTime('minutes', 15, '{{ hourID }}', '{{ minuteID }}')">
                     <i class="bi bi-arrow-up"></i>
@@ -21,6 +24,9 @@
                     value="{% if currHour is not none %}{{ currHour }}{% else %}12{% endif %}" readonly>
             </td>
             <td>
+                :
+            </td>
+            <td>
                 <input type="text" class="form-control text-center" id="{{ minuteID }}" name="{{type}}minutes"
                     value="{% if currMin is not none %}{{ currMin }}{% else %}0{% endif %}" readonly>
             </td>
@@ -31,6 +37,9 @@
                     onclick="changeTime('hours', -1, '{{ hourID }}', '{{ minuteID }}')">
                     <i class="bi bi-arrow-down"></i>
                 </button>
+            </td>
+            <td>
+                <!-- placeholder -->
             </td>
             <td>
                 <button type="button" class="btn btn-outline-secondary w-100"
