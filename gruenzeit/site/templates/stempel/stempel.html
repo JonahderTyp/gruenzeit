@@ -42,9 +42,9 @@
         <div class="card shadow-sm mb-1">
             <div class="card-body">
                 <h5 class="card-title">
-                    {{userTime.start_time}} -
+                    {{userTime.start_time.str}} -
                     {% if userTime.end_time %}
-                    {{userTime.end_time}}
+                    {{userTime.end_time.str}}
                     {%else%}
                     jetzt
                     {%endif%}
@@ -53,7 +53,7 @@
                     {%endif%}
                 </h5>
                 <small class="text-muted">
-                    
+
                 </small>
                 <p class="card-text">
                     {% if userTime.job %}
@@ -80,9 +80,46 @@
                 <div class="card-body">
                     <h5 class="card-title">Neue Zeit Stempeln</h5>
                     <form action="{{ url_for('site.stempel.start')}}" id="timeForm" method="post">
-                        <label for="timeTable">Uhrzeit:</label>
-                        <div class="table-responsive mb-3" id="timeTable">
-                            {{ build_timeinput('startHour', 'startMinute', currHour, currMin) }}
+                        <div class="row">
+                            <div class="col-sm-4 mb-3 mb-sm-0">
+                                <div class="card mb-1">
+                                    <div class="card-body">
+                                        <h3 class="card-title">Von:</h3>
+                                        <div>
+                                            <div class="table-responsive mb-3" id="timeTableStart">
+                                                {{ build_timeinput('startHour', 'startMinute',
+                                                currHour, currMin, 'start')}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <h3 class="card-title">Bis:</h3>
+                                        <div>
+                                            <div class="table-responsive mb-3" id="timeTableEnd">
+                                                {{ build_timeinput('endHour', 'endMinute',
+                                                currHour, currMin, 'end')}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <h3 class="card-title">Davon Pause:</h3>
+                                        <div>
+                                            <div class="table-responsive mb-3" id="pause">
+                                                {{ build_timeinput('pauseHour',
+                                                'pauseMinute','00','00', 'pause')}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="input-group mb-3">
                             <span class="input-group-text" id="baustelle">Baustelle</span>
@@ -113,17 +150,61 @@
 {% for userTime in userTimesToday %}
 <div class="modal fade" id="timeModal{{userTime.id}}" tabindex="-1" aria-labelledby="timeModal{{userTime.id}}Label"
     aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header">
-                <h1 class="modal-title fs-5" id="timeModal{{userTime.id}}Label">Modal {{userTime.id}}</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form action="" id="timeForm" method="post">
-                    <label for="timeTable">Uhrzeit:</label>
-                    <div class="table-responsive mb-3" id="timeTable">
-                        {{ build_timeinput('startHourID'~userTime.id, 'startMinuteID'~userTime.id, currHour, currMin)}}
+            <form action="" id="timeForm" method="get">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="timeModal{{userTime.id}}Label">
+                        Bearbeiten {{userTime.start_time.str}} - {{userTime.end_time.str | default('jetzt')}} ({{userTime.duration}})
+                        {{userTime.job.name | default('Keine Baustelle ausgewählt')}}
+                    </h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-4 mb-3 mb-sm-0">
+                            <div class="card mb-1">
+                                <div class="card-body">
+                                    <h3 class="card-title">Von:</h3>
+                                    <div>
+                                        <div class="table-responsive mb-3" id="timeStart{{userTime.id}}">
+                                            {{ build_timeinput('startHourID'~userTime.id, 'startMinuteID'~userTime.id,
+                                            userTime.start_time.hour, userTime.start_time.minute, 'start')}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-sm-4">
+
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h3 class="card-title">Bis:</h3>
+                                    <div>
+                                        <div class="table-responsive mb-3" id="timeEnd{{userTime.id}}">
+                                            {{ build_timeinput('endHourID'~userTime.id, 'endMinuteID'~userTime.id,
+                                            userTime.end_time.hour if userTime.end_time else currHour,
+                                            userTime.end_time.minute if userTime.end_time else currMin,
+                                            'end')}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h3 class="card-title">Davon Pause:</h3>
+                                    <div>
+                                        <div class="table-responsive mb-3" id="pause{{userTime.id}}">
+                                            {{ build_timeinput('pauseHourID'~userTime.id,
+                                            'pauseMinuteID'~userTime.id,'00','00', 'pause')}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="input-group mb-3">
                         <span class="input-group-text" id="baustelle">Baustelle</span>
@@ -136,16 +217,11 @@
                             {%endfor%}
                         </select>
                     </div>
-
-                    <div class="d-grid gap-2 mt-3">
-                        <button type="submit" class="btn btn-primary">Submit Time</button>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
-            </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Speichern</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

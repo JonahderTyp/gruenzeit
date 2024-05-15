@@ -28,8 +28,12 @@ def overview():
 
         stempelung.append({
             "id": entry.id,
-            "start_time": entry.start_time.strftime("%H:%M"),
-            "end_time": entry.end_time.strftime("%H:%M") if entry.end_time else None,
+            "start_time": {"str": entry.start_time.strftime("%H:%M"),
+                           "hour": entry.start_time.strftime("%H"),
+                           "minute": entry.start_time.strftime("%M")},
+            "end_time": {"str": entry.end_time.strftime("%H:%M"),
+                         "hour": entry.end_time.strftime("%H"),
+                         "minute": entry.end_time.strftime("%M")} if entry.end_time else None,
             "duration": f"{str(duration).split('.')[0][:-3]}" if duration and duration.total_seconds() > 0 else None,
             # "timetype": {"name": entry.time_type.name, "id": entry.time_type.id},
             "job": entry.job.toDict() if entry.job else None,
@@ -40,13 +44,13 @@ def overview():
 
     # pprint(timetypes)
 
-    current_hour = current_time.hour
-    current_minute = (current_time.minute // 15)*15
+    current_hour = ("0" + str(current_time.hour))[-2:]
+    current_minute = ("0" + str((current_time.minute // 15)*15))[-2:]
 
     return render_template("stempel/stempel.html",
                            userTimesToday=stempelung,
                            baustellen=baustellen_active,
-                        #    timetypes=timetypes,
+                           #    timetypes=timetypes,
                            currHour=current_hour,
                            currMin=current_minute)
 
@@ -64,18 +68,18 @@ def start():
     usr: user = current_user
     if request.method == "POST":
         print(request.form)
-        hours = request.form.get("hours")
-        minutes = request.form.get("minutes")
+        starthours = request.form.get("starthours")
+        endminutes = request.form.get("startminutes")
         # timetype_id = request.form.get("timetype")
         baustelle_id = request.form.get("baustelle")
         print(baustelle_id)
-        if not hours or not minutes:
-            return abort(401)
+        if not starthours or not endminutes:
+            return abort(400)
         try:
-            hours = int(hours)
-            minutes = int(minutes)
+            starthours = int(starthours)
+            endminutes = int(endminutes)
             entry_time = datetime.now().replace(
-                hour=hours, minute=minutes, second=0, microsecond=0)
+                hour=starthours, minute=endminutes, second=0, microsecond=0)
         except ValueError:
             return abort(400)
         try:
