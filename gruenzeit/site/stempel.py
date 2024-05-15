@@ -10,9 +10,16 @@ from typing import List
 
 stempel_site = Blueprint("stempel", __name__, url_prefix="/stempel")
 
+# reqire the user to be logged in
+
+
+@stempel_site.before_request
+@login_required
+def before_request():
+    pass
+
 
 @stempel_site.route("/", methods=["GET", "POST"])
-@login_required
 def overview():
     usr: user = current_user
     baustellen_active = job.getJobs(job_status.query.get(1)) \
@@ -34,6 +41,10 @@ def overview():
             "end_time": {"str": entry.end_time.strftime("%H:%M"),
                          "hour": entry.end_time.strftime("%H"),
                          "minute": entry.end_time.strftime("%M")} if entry.end_time else None,
+            "pause_time": {"str": f"{entry.pause_time // 60}h {entry.pause_time % 60}m",
+                           "hour": entry.pause_time // 60,
+                           "minute": entry.pause_time % 60},
+
             "duration": f"{str(duration).split('.')[0][:-3]}" if duration and duration.total_seconds() > 0 else None,
             # "timetype": {"name": entry.time_type.name, "id": entry.time_type.id},
             "job": entry.job.toDict() if entry.job else None,
@@ -55,12 +66,59 @@ def overview():
                            currMin=current_minute)
 
 
-@stempel_site.route("/edit/<int:id>", methods=["GET", "POST"])
+@stempel_site.post("/edit/<int:id>")
 def edit(id):
     usr: user = current_user
-    if request.method == "POST":
-        pass
-    return render_template("stempel/edit.html")
+    if not request.method == "POST":
+        return abort(400)
+
+    try:
+        entry = TimeEntries.getEntry(id)
+    except ElementDoesNotExsist:
+        return abort(404)
+
+    if entry.user != usr:
+        return abort(403)
+
+    print("Edditing Entry", entry.toDict())
+    print(request.form)
+
+    starthours = request.form.get("starthours")
+    startminutes = request.form.get("startminutes")
+    endhours = request.form.get("endhours")
+    endminutes = request.form.get("endminutes")
+    pausehours = request.form.get("pausehours")
+    pauseminutes = request.form.get("pauseminutes")
+    baustelle_id = request.form.get("baustelle")
+
+    if not starthours or not startminutes or not endhours or not endminutes:
+        return abort(400)
+
+    try:
+        starthours = int(starthours)
+        startminutes = int(startminutes)
+        start_time = datetime.now().replace(
+            hour=starthours, minute=startminutes, second=0, microsecond=0)
+
+        endhours = int(endhours)
+        endminutes = int(endminutes)
+        end_time = datetime.now().replace(
+            hour=endhours, minute=endminutes, second=0, microsecond=0)
+
+        pausehours = int(pausehours)
+        pauseminutes = int(pauseminutes)
+        pause_time = pausehours*60 + pauseminutes
+    except ValueError:
+        return abort(400)
+
+    try:
+        TimeEntries.edit(entry, start_time, end_time, pause_time,
+                         job.getJob(baustelle_id) if baustelle_id else None)
+    except ValueError as ex:
+        print(ex)
+        return abort(400)
+
+    return redirect(url_for(".overview"))
 
 
 @stempel_site.route("/start", methods=["POST"])
@@ -69,21 +127,33 @@ def start():
     if request.method == "POST":
         print(request.form)
         starthours = request.form.get("starthours")
-        endminutes = request.form.get("startminutes")
-        # timetype_id = request.form.get("timetype")
+        startminutes = request.form.get("startminutes")
+        endhours = request.form.get("endhours")
+        endminutes = request.form.get("endminutes")
+        pausehours = request.form.get("pausehours")
+        pauseminutes = request.form.get("pauseminutes")
         baustelle_id = request.form.get("baustelle")
         print(baustelle_id)
-        if not starthours or not endminutes:
+        if not starthours or not startminutes or not endhours or not endminutes:
             return abort(400)
         try:
             starthours = int(starthours)
+            startminutes = int(startminutes)
+            start_time = datetime.now().replace(
+                hour=starthours, minute=startminutes, second=0, microsecond=0)
+
+            endhours = int(endhours)
             endminutes = int(endminutes)
-            entry_time = datetime.now().replace(
-                hour=starthours, minute=endminutes, second=0, microsecond=0)
+            end_time = datetime.now().replace(
+                hour=endhours, minute=endminutes, second=0, microsecond=0)
+
+            pausehours = int(pausehours)
+            pauseminutes = int(pauseminutes)
+            pause_time = pausehours*60 + pauseminutes
         except ValueError:
             return abort(400)
         try:
-            TimeEntries.newEntry(usr, entry_time,
+            TimeEntries.newEntry(usr, start_time, end_time, pause_time,
                                  job.getJob(baustelle_id) if baustelle_id else None)
         except ElementAlreadyExists as ex:
             print(ex)

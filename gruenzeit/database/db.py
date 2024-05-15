@@ -197,6 +197,25 @@ class TimeEntries(db.Model, dictable):
         db.session.commit()
         return new_entry
 
+    def edit(self, start_time: datetime, end_time: datetime, pause_time: int, job: job | None):
+
+        if start_time.date() != end_time.date():
+            raise ValueError("Start time and end time must be on the same day")
+
+        if start_time > end_time:
+            logging.warning("Start time is after end time. Swapping times")
+            start_time, end_time = end_time, start_time
+
+        if pause_time > ((end_time - start_time).total_seconds() / 60):
+            raise ValueError(
+                "Pause time cannot be greater than the timespan between start time and end time")
+
+        self.start_time = start_time
+        self.end_time = end_time
+        self.pause_time = pause_time
+        self.job_id = job.id if job else None
+        db.session.commit()
+
     @staticmethod
     def getEntry(id: int) -> TimeEntries:
         te: TimeEntries = TimeEntries.query.get(id)
@@ -204,14 +223,6 @@ class TimeEntries(db.Model, dictable):
             raise ElementDoesNotExsist(
                 f"TimeEntry mit der ID {id} existiert nicht")
         return te
-
-    def end(self):
-        self.end_time = datetime.now()
-        db.session.commit()
-
-    @staticmethod
-    def getUnfinishedEntries(usr: user) -> List[TimeEntries]:
-        return TimeEntries.query.filter_by(user_id=usr.get_id(), end_time=None).all()
 
     @staticmethod
     def getEntriesToday(usr: user) -> List[TimeEntries]:

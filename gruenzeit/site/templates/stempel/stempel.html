@@ -152,10 +152,11 @@
     aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form action="" id="timeForm" method="get">
+            <form action="{{url_for('site.stempel.edit', id=userTime.id)}}" id="timeForm" method="post">
                 <div class="modal-header">
                     <h1 class="modal-title fs-5" id="timeModal{{userTime.id}}Label">
-                        Bearbeiten {{userTime.start_time.str}} - {{userTime.end_time.str | default('jetzt')}} ({{userTime.duration}})
+                        Bearbeiten {{userTime.start_time.str}} - {{userTime.end_time.str | default('jetzt')}}
+                        ({{userTime.duration}})
                         {{userTime.job.name | default('Keine Baustelle ausgewählt')}}
                     </h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -199,7 +200,10 @@
                                     <div>
                                         <div class="table-responsive mb-3" id="pause{{userTime.id}}">
                                             {{ build_timeinput('pauseHourID'~userTime.id,
-                                            'pauseMinuteID'~userTime.id,'00','00', 'pause')}}
+                                            'pauseMinuteID'~userTime.id,
+                                            userTime.pause_time.hour if userTime.pause_time.hour else "00",
+                                            userTime.pause_time.minute if userTime.pause_time.minute else "00",
+                                            'pause')}}
                                         </div>
                                     </div>
                                 </div>
