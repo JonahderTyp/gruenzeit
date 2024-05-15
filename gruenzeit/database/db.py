@@ -6,6 +6,7 @@ from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey, Date
 from .exceptions import ElementAlreadyExists, ElementDoesNotExsist
 from typing import List, Dict
 from datetime import datetime
+import logging
 
 
 db = SQLAlchemy()
@@ -147,27 +148,48 @@ class TimeEntries(db.Model, dictable):
     job: Mapped[job] = relationship('job', backref='time_entries')
 
     @staticmethod
-    def newEntry(user: user, start_time: datetime = None, job: job = None) -> TimeEntries:
+    def newEntry(user: user,
+                 start_time: datetime = None,
+                 end_time: datetime = None,
+                 pause_time: int = 0,
+                 job: job | None = None) -> TimeEntries:
         """
         Creates a new time entry in the database.
 
         Args:
-            user (user): The user associated with the time entry.
-            start_time (datetime, optional): The start time of the entry. Defaults to None.
-            job (job, optional): The job associated with the time entry. Defaults to None.
+            user (User): The user associated with the time entry.
+            start_time (datetime, optional): The start time of the time entry. Defaults to None.
+            end_time (datetime, optional): The end time of the time entry. Defaults to None.
+            pause_time (int, optional): The pause time in minutes. Defaults to 0.
+            job (Job, optional): The job associated with the time entry. Defaults to None.
 
         Returns:
             TimeEntries: The newly created time entry.
 
         Raises:
-            ValueError: If not all required arguments are set.
+            ValueError: If not all required arguments are set or if start time and end time are not on the same day
+                        or if pause time is greater than the timespan between start time and end time.
         """
+
         if not user or not start_time:
             raise ValueError("Not all required arguments are set")
+
+        if start_time.date() != end_time.date():
+            raise ValueError("Start time and end time must be on the same day")
+
+        if start_time > end_time:
+            logging.warning("Start time is after end time. Swapping times")
+            start_time, end_time = end_time, start_time
+
+        if pause_time > ((end_time - start_time).total_seconds() / 60):
+            raise ValueError(
+                "Pause time cannot be greater than the timespan between start time and end time")
 
         new_entry = TimeEntries(
             user_id=user.get_id(),
             start_time=start_time,
+            end_time=end_time,
+            pause_time=pause_time,
             job_id=job.id if job else None
         )
         print("New Entry", new_entry.toDict())
