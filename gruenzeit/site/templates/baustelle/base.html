@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Stempeln{% endblock %}
+
+
+{% block content %}
+
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {% if active_tab == 'overview' %}active{% endif %}"
+            href="{{url_for('site.baustelle.overview')}}">Übersicht</a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {% if active_tab == 'new' %}active{% endif %}" href="{{url_for('site.baustelle.new')}}">Neu</a>
+    </li>
+</ul>
+<div class="tab-content mt-3">
+    {% block nav_content %}
+    {% endblock %}
+</div>
+
+{% endblock %}

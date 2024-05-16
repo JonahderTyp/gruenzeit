@@ -19,7 +19,7 @@ def auth():
 
 
 @baustelle_site.route("/", methods=["GET", "POST"])
-def baustellen():
+def overview():
     error_message = ""
     if request.method == "POST":
         autragsnummer = request.form.get("auftragsnummer").strip()
@@ -31,7 +31,7 @@ def baustellen():
                                             auftragsadresse, auftragsbeschreibung)
         return redirect(url_for(".baustelle", id=new_baustelle.id))
     bst: List[job] = job.query.all()
-    return render_template("baustelle/baustellen.html", baustellen=bst)
+    return render_template("baustelle/overview.html", baustellen=bst)
 
 
 @baustelle_site.route("/new", methods=["GET", "POST"])
