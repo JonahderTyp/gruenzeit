@@ -58,7 +58,9 @@
     aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form action="{{url_for('site.stempel.edit', id=userTime.id)}}" id="timeForm" method="post">
+            <form action="{{url_for('site.stempel.edit', id=userTime.id)}}" id="timeForm{{userTime.id}}" method="post"
+            onsubmit="return validateTimes('startHourID{{userTime.id}}', 'startMinuteID{{userTime.id}}', 'endHourID{{userTime.id}}', 'endMinuteID{{userTime.id}}', 'pauseHourID{{userTime.id}}', 'pauseMinuteID{{userTime.id}}', 'alertDiv{{userTime.id}}');">
+
                 <div class="modal-header">
                     <h1 class="modal-title fs-5" id="timeModal{{userTime.id}}Label">
                         Bearbeiten {{userTime.start_time.str}} - {{userTime.end_time.str | default('jetzt')}}
@@ -68,6 +70,9 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+
+                    <div id="alertDiv{{userTime.id}}" class="alert alert-warning d-none" role="alert"></div>
+                    
                     <div class="row">
                         <div class="col-sm-4 mb-3 mb-sm-0">
                             <div class="card mb-1">

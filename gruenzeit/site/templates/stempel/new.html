@@ -10,63 +10,65 @@
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">Neue Zeit Stempeln</h5>
-                <form action="{{ url_for('site.stempel.start')}}" id="timeForm" method="post">
-                    <div class="row">
-                        <div class="col-sm-4 mb-3 mb-sm-0">
-                            <div class="card mb-1">
-                                <div class="card-body">
-                                    <h3 class="card-title">Von:</h3>
-                                    <div>
-                                        <div class="table-responsive mb-3" id="timeTableStart">
-                                            {{ build_timeinput('startHour', 'startMinute',
-                                            currHour, currMin, 'start')}}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-4">
-                            <div class="card mb-3">
-                                <div class="card-body">
-                                    <h3 class="card-title">Bis:</h3>
-                                    <div>
-                                        <div class="table-responsive mb-3" id="timeTableEnd">
-                                            {{ build_timeinput('endHour', 'endMinute',
-                                            currHour, currMin, 'end')}}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-4">
-                            <div class="card mb-3">
-                                <div class="card-body">
-                                    <h3 class="card-title">Davon Pause:</h3>
-                                    <div>
-                                        <div class="table-responsive mb-3" id="pause">
-                                            {{ build_timeinput('pauseHour',
-                                            'pauseMinute','00','00', 'pause')}}
-                                        </div>
+                <form action="{{ url_for('site.stempel.start')}}" id="timeForm" method="post"
+                    onsubmit="return validateTimes('startHour', 'startMinute', 'endHour', 'endMinute', 'pauseHour', 'pauseMinute', 'alertDiv');">
+                <div id="alertDiv" class="alert alert-warning d-none" role="alert"></div>
+                <div class="row">
+                    <div class="col-sm-4 mb-3 mb-sm-0">
+                        <div class="card mb-1">
+                            <div class="card-body">
+                                <h3 class="card-title">Von:</h3>
+                                <div>
+                                    <div class="table-responsive mb-3" id="timeTableStart">
+                                        {{ build_timeinput('startHour', 'startMinute',
+                                        currHour, currMin, 'start')}}
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="input-group mb-3">
-                        <span class="input-group-text" id="baustelle">Baustelle</span>
-                        <select class="form-select" name="baustelle" id="baustelle" aria-label="baustelle"
-                            aria-describedby="baustelle">
+                    <div class="col-sm-4">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h3 class="card-title">Bis:</h3>
+                                <div>
+                                    <div class="table-responsive mb-3" id="timeTableEnd">
+                                        {{ build_timeinput('endHour', 'endMinute',
+                                        currHour, currMin, 'end')}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h3 class="card-title">Davon Pause:</h3>
+                                <div>
+                                    <div class="table-responsive mb-3" id="pause">
+                                        {{ build_timeinput('pauseHour',
+                                        'pauseMinute','00','00', 'pause')}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="baustelle">Baustelle</span>
+                    <select class="form-select" name="baustelle" id="baustelle" aria-label="baustelle"
+                        aria-describedby="baustelle">
 
-                            <option selected value="">Keine</option>
-                            {% for baustelle in baustellen %}
-                            <option value="{{baustelle.id}}">{{baustelle.name}}</option>
-                            {%endfor%}
-                        </select>
-                    </div>
+                        <option selected value="">Keine</option>
+                        {% for baustelle in baustellen %}
+                        <option value="{{baustelle.id}}">{{baustelle.name}}</option>
+                        {%endfor%}
+                    </select>
+                </div>
 
-                    <div class="d-grid gap-2 mt-3">
-                        <button type="submit" class="btn btn-primary">Submit Time</button>
-                    </div>
+                <div class="d-grid gap-2 mt-3">
+                    <button type="submit" class="btn btn-primary">Submit Time</button>
+                </div>
                 </form>
             </div>
         </div>

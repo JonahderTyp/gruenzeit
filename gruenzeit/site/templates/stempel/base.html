@@ -44,6 +44,43 @@
             minutesInput.value = minutesValue.toString().padStart(2, '0');
         }
     }
+
+    function validateTimes(startHourID, startMinuteID, endHourID, endMinuteID, pauseHourID, pauseMinuteID, alertDivID) {
+        const startHour = parseInt(document.getElementById(startHourID).value);
+        const startMinute = parseInt(document.getElementById(startMinuteID).value);
+        const endHour = parseInt(document.getElementById(endHourID).value);
+        const endMinute = parseInt(document.getElementById(endMinuteID).value);
+        const pauseHour = parseInt(document.getElementById(pauseHourID).value);
+        const pauseMinute = parseInt(document.getElementById(pauseMinuteID).value);
+    
+        const alertDiv = document.getElementById(alertDivID);
+        alertDiv.classList.add('d-none');  // Hide alert div by default
+    
+        const startTime = new Date();
+        startTime.setHours(startHour, startMinute, 0, 0);
+    
+        const endTime = new Date();
+        endTime.setHours(endHour, endMinute, 0, 0);
+    
+        if (endTime <= startTime) {
+            alertDiv.textContent = 'Du musst eine Endzeit wählen, die nach der Startzeit liegt.';
+            alertDiv.classList.remove('d-none');  // Show alert div
+            alertDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });  // Scroll to alert div
+            return false;
+        }
+    
+        const duration = (endTime - startTime) / 60000; // difference in minutes
+        const pauseDuration = (pauseHour * 60) + pauseMinute;
+    
+        if (pauseDuration >= duration) {
+            alertDiv.textContent = 'Du musst eine Pausenzeit wählen, die kürzer ist als die Arbeitszeit.';
+            alertDiv.classList.remove('d-none');  // Show alert div
+            alertDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });  // Scroll to alert div
+            return false;
+        }
+    
+        return true;
+    }
 </script>
 
 {% endblock %}
