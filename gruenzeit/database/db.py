@@ -6,6 +6,7 @@ from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey, Date
 from .exceptions import ElementAlreadyExists, ElementDoesNotExsist
 from typing import List, Dict
 from datetime import datetime
+import logging
 
 
 db = SQLAlchemy()
@@ -54,16 +55,6 @@ class vehicle(db.Model, dictable):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(45), nullable=True)
     kennzeichen = Column(String(45), nullable=True)
-
-
-class TimeType(db.Model, dictable):
-    __tablename__ = 'timetype'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(45), nullable=True)
-
-    @staticmethod
-    def getList() -> List[TimeType]:
-        return TimeType.query.all()
 
 
 class job_status(db.Model, dictable):
@@ -150,43 +141,80 @@ class TimeEntries(db.Model, dictable):
     id = Column(Integer, primary_key=True, autoincrement=True)
     start_time: datetime = Column(DateTime, nullable=True)
     end_time: datetime = Column(DateTime, nullable=True)
+    pause_time: int = Column(Integer, nullable=True)    # in minutes
     user_id = Column(Integer, ForeignKey('user.username'))
-    time_type_id = Column(Integer, ForeignKey('timetype.id'))
     job_id = Column(Integer, ForeignKey('job.id'))
     user: Mapped[user] = relationship('user', backref='time_entries')
-    time_type: Mapped[TimeType] = relationship('TimeType', backref='time_entries')
     job: Mapped[job] = relationship('job', backref='time_entries')
 
     @staticmethod
-    def newEntry(user: user, time_type: TimeType, start_time: datetime = None, job: job = None) -> TimeEntries:
+    def newEntry(user: user,
+                 start_time: datetime = None,
+                 end_time: datetime = None,
+                 pause_time: int = 0,
+                 job: job | None = None) -> TimeEntries:
         """
         Creates a new time entry in the database.
 
         Args:
-            user (user): The user associated with the time entry.
-            time_type (TimeType): The type of time entry.
-            start_time (datetime, optional): The start time of the entry. Defaults to None.
-            job (job, optional): The job associated with the time entry. Defaults to None.
+            user (User): The user associated with the time entry.
+            start_time (datetime, optional): The start time of the time entry. Defaults to None.
+            end_time (datetime, optional): The end time of the time entry. Defaults to None.
+            pause_time (int, optional): The pause time in minutes. Defaults to 0.
+            job (Job, optional): The job associated with the time entry. Defaults to None.
 
         Returns:
             TimeEntries: The newly created time entry.
 
         Raises:
-            ValueError: If not all required arguments are set.
+            ValueError: If not all required arguments are set or if start time and end time are not on the same day
+                        or if pause time is greater than the timespan between start time and end time.
         """
-        if not user or not time_type or not start_time:
+
+        if not user or not start_time:
             raise ValueError("Not all required arguments are set")
+
+        if start_time.date() != end_time.date():
+            raise ValueError("Start time and end time must be on the same day")
+
+        if start_time > end_time:
+            logging.warning("Start time is after end time. Swapping times")
+            start_time, end_time = end_time, start_time
+
+        if pause_time > ((end_time - start_time).total_seconds() / 60):
+            raise ValueError(
+                "Pause time cannot be greater than the timespan between start time and end time")
 
         new_entry = TimeEntries(
             user_id=user.get_id(),
-            time_type_id=time_type.id,
             start_time=start_time,
+            end_time=end_time,
+            pause_time=pause_time,
             job_id=job.id if job else None
         )
         print("New Entry", new_entry.toDict())
         db.session.add(new_entry)
         db.session.commit()
         return new_entry
+
+    def edit(self, start_time: datetime, end_time: datetime, pause_time: int, job: job | None):
+
+        if start_time.date() != end_time.date():
+            raise ValueError("Start time and end time must be on the same day")
+
+        if start_time > end_time:
+            logging.warning("Start time is after end time. Swapping times")
+            start_time, end_time = end_time, start_time
+
+        if pause_time > ((end_time - start_time).total_seconds() / 60):
+            raise ValueError(
+                "Pause time cannot be greater than the timespan between start time and end time")
+
+        self.start_time = start_time
+        self.end_time = end_time
+        self.pause_time = pause_time
+        self.job_id = job.id if job else None
+        db.session.commit()
 
     @staticmethod
     def getEntry(id: int) -> TimeEntries:
@@ -196,39 +224,11 @@ class TimeEntries(db.Model, dictable):
                 f"TimeEntry mit der ID {id} existiert nicht")
         return te
 
-    def end(self):
-        self.end_time = datetime.now()
-        db.session.commit()
-
-    @staticmethod
-    def getUnfinishedEntries(usr: user) -> List[TimeEntries]:
-        return TimeEntries.query.filter_by(user_id=usr.get_id(), end_time=None).all()
-
     @staticmethod
     def getEntriesToday(usr: user) -> List[TimeEntries]:
         return TimeEntries.query.filter_by(user_id=usr.get_id()) \
             .filter(TimeEntries.start_time >= datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)) \
             .order_by(TimeEntries.start_time.asc()).all()
-
-    @staticmethod
-    @DeprecationWarning
-    def getCurrentEntry(user) -> TimeType:
-        raise DeprecationWarning
-        te: TimeEntries = TimeEntries.query.filter_by(user=user) \
-            .order_by(TimeEntries.start_time.desc()) \
-            .first()
-        if not te:
-            return None
-        return TimeType.query.get({"id": te.time_type_id})
-
-    @staticmethod
-    def getAvailableEntrys(user: user) -> List[TimeType]:
-        raise DeprecationWarning
-        types: List[TimeType] = TimeType.query.all()
-        current = TimeEntries.getCurrentEntry(user)
-        if current is None:
-            return [i for i in types if "beginn" in str(i.name).lower()]
-        pass
 
 
 class user_in_vehicle(db.Model, dictable):
