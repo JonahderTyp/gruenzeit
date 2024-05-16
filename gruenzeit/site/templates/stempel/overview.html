@@ -1,0 +1,140 @@
+{% extends "stempel/base.html" %}
+{% set active_tab = 'overview' %}
+{% from "stempel/timetable.html" import build_timeinput %}
+{% block title %}Übersicht{% endblock %}
+
+{% block nav_content %}
+<div class="tab-pane fade show active" id="overview" role="tabpanel">
+    <h2 class="text-center mb-2 mt-1">Deine Zeitleiste Heute</h2>
+    {% if not userTimesToday %}
+    <div class="alert alert-warning" role="alert">
+        Du hast heute noch keine Zeiten gestempelt.
+    </div>
+    {%else%}
+    {% for userTime in userTimesToday %}
+
+    <!-- FOR DEBUGGING: -->
+    <!-- {{userTime}} -->
+
+    <div class="card shadow-sm mb-1">
+        <div class="card-body">
+            <h5 class="card-title">
+                {{userTime.start_time.str}} -
+                {% if userTime.end_time %}
+                {{userTime.end_time.str}}
+                {%else%}
+                jetzt
+                {%endif%}
+                {%if userTime.duration %}
+                ({{userTime.duration}})
+                {%endif%}
+            </h5>
+            <small class="text-muted">
+
+            </small>
+            <p class="card-text">
+                {% if userTime.job %}
+                {{userTime.job.name}}
+                {%else%}
+                Keine Baustelle ausgewählt
+                {%endif%}
+            </p>
+
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                data-bs-target="#timeModal{{userTime.id}}">
+                Bearbeiten
+            </button>
+            <!-- <a class="btn btn-primary" href="{{ url_for('site.stempel.edit', id=userTime.id)}}"
+                    role="button">Bearbeiten</a> -->
+        </div>
+    </div>
+    {%endfor%}
+    {%endif%}
+</div>
+
+{%if userTimesToday %}
+{% for userTime in userTimesToday %}
+<div class="modal fade" id="timeModal{{userTime.id}}" tabindex="-1" aria-labelledby="timeModal{{userTime.id}}Label"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form action="{{url_for('site.stempel.edit', id=userTime.id)}}" id="timeForm" method="post">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="timeModal{{userTime.id}}Label">
+                        Bearbeiten {{userTime.start_time.str}} - {{userTime.end_time.str | default('jetzt')}}
+                        ({{userTime.duration}})
+                        {{userTime.job.name | default('Keine Baustelle ausgewählt')}}
+                    </h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-4 mb-3 mb-sm-0">
+                            <div class="card mb-1">
+                                <div class="card-body">
+                                    <h3 class="card-title">Von:</h3>
+                                    <div>
+                                        <div class="table-responsive mb-3" id="timeStart{{userTime.id}}">
+                                            {{ build_timeinput('startHourID'~userTime.id, 'startMinuteID'~userTime.id,
+                                            userTime.start_time.hour, userTime.start_time.minute, 'start')}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-sm-4">
+
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h3 class="card-title">Bis:</h3>
+                                    <div>
+                                        <div class="table-responsive mb-3" id="timeEnd{{userTime.id}}">
+                                            {{ build_timeinput('endHourID'~userTime.id, 'endMinuteID'~userTime.id,
+                                            userTime.end_time.hour if userTime.end_time else currHour,
+                                            userTime.end_time.minute if userTime.end_time else currMin,
+                                            'end')}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h3 class="card-title">Davon Pause:</h3>
+                                    <div>
+                                        <div class="table-responsive mb-3" id="pause{{userTime.id}}">
+                                            {{ build_timeinput('pauseHourID'~userTime.id,
+                                            'pauseMinuteID'~userTime.id,
+                                            userTime.pause_time.hour if userTime.pause_time.hour else "00",
+                                            userTime.pause_time.minute if userTime.pause_time.minute else "00",
+                                            'pause')}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="baustelle">Baustelle</span>
+                        <select class="form-select" name="baustelle" id="baustelle" aria-label="baustelle"
+                            aria-describedby="baustelle">
+
+                            <option selected value="">Keine</option>
+                            {% for baustelle in baustellen %}
+                            <option value="{{baustelle.id}}">{{baustelle.name}}</option>
+                            {%endfor%}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Speichern</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{%endfor%}
+{%endif%}
+{% endblock %}

@@ -58,10 +58,26 @@ def overview():
     current_hour = ("0" + str(current_time.hour))[-2:]
     current_minute = ("0" + str((current_time.minute // 15)*15))[-2:]
 
-    return render_template("stempel/stempel.html",
+    return render_template("stempel/overview.html",
                            userTimesToday=stempelung,
                            baustellen=baustellen_active,
                            #    timetypes=timetypes,
+                           currHour=current_hour,
+                           currMin=current_minute)
+
+
+@stempel_site.route("/new", methods=["GET", "POST"])
+def new():
+    usr: user = current_user
+    baustellen_active = job.getJobs(job_status.query.get(1)) \
+        + job.getJobs(job_status.query.get(2))
+
+    current_time = datetime.now()
+    current_hour = ("0" + str(current_time.hour))[-2:]
+    current_minute = ("0" + str((current_time.minute // 15)*15))[-2:]
+
+    return render_template("stempel/new.html",
+                           baustellen=baustellen_active,
                            currHour=current_hour,
                            currMin=current_minute)
 

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Stempeln{% endblock %}
+
+
+{% block content %}
+
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {% if active_tab == 'overview' %}active{% endif %}"
+            href="{{url_for('site.stempel.overview')}}">Übersicht</a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link {% if active_tab == 'new' %}active{% endif %}" href="{{url_for('site.stempel.new')}}">Neu</a>
+    </li>
+</ul>
+<div class="tab-content mt-3">
+    {% block nav_content %}
+    {% endblock %}
+</div>
+
+<script>
+
+    function changeTime(type, change, hourID, minuteID) {
+        const hoursInput = document.getElementById(hourID);
+        const minutesInput = document.getElementById(minuteID);
+        let hoursValue = parseInt(hoursInput.value);
+        let minutesValue = parseInt(minutesInput.value);
+
+        if (type === 'hours') {
+            hoursValue += change;
+            if (hoursValue > 23) hoursValue = 0;
+            if (hoursValue < 0) hoursValue = 23;
+            hoursInput.value = hoursValue.toString().padStart(2, '0');
+        } else if (type === 'minutes') {
+            minutesValue += change;
+            if (minutesValue > 59) {
+                minutesValue -= 60;
+                changeTime('hours', 1, hourID, minuteID); // Automatically adjust hour when minutes exceed 59
+            }
+            if (minutesValue < 0) {
+                minutesValue += 60;
+                changeTime('hours', -1, hourID, minuteID); // Automatically adjust hour when minutes go below 0
+            }
+            minutesInput.value = minutesValue.toString().padStart(2, '0');
+        }
+    }
+</script>
+
+{% endblock %}
