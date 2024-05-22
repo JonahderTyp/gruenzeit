@@ -72,7 +72,7 @@ def new():
         auftragsadresse = request.form.get("auftragsadresse").strip()
         auftragsbeschreibung = request.form.get(
             "auftragsbeschreibung").strip().replace("\r\n", "\n")
-        
+
         new_baustelle = job.createNew(autragsnummer, auftragsname,
                                       auftragsadresse, auftragsbeschreibung)
 
@@ -92,6 +92,7 @@ def new():
 def baustelle(id):
     try:
         bst = job.getJob(id).toHTML()
+        pprint([i[:10] for i in bst.get("bilder")])
     except ElementDoesNotExsist as ex:
         abort(404)
     return render_template("baustelle/baustelle.html", baustelle=bst)

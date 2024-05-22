@@ -19,6 +19,24 @@
                 <p id="baustelleBeschreibung">{% for b in baustelle.beschreibung %} {{b}} <br> {% endfor %}</p>
             </div>
             <a href="{{ url_for('.edit', id=baustelle.id)}}" class="btn btn-primary">Bearbeiten</a>
+
+
+            <div class="container mt-5">
+                <h1>1</h1>
+                <div class="row row-cols-1 row-cols-md-3 g-4">
+                    {% for bild in baustelle.bilder %}
+                    <div class="col">
+                        <!-- <label for="baustelleBild" class="form-label accordion mb-0 "><strong>Bild:</strong></label> -->
+                        <img src="data:image/png;base64,{{bild}}" class="img-thumbnail" alt="Bild">
+
+                    </div>
+
+                    {%endfor%}
+                </div>
+            </div>
+
+
+
         </div>
     </div>
 </div>
