@@ -254,3 +254,30 @@ class Bild(db.Model, dictable):
     id = Column(Integer, primary_key=True, autoincrement=True)
     bild = Column(String(), nullable=True)
     job_id = Column(Integer, ForeignKey('job.id'))
+
+
+    @staticmethod
+    def uploadImage(job: job, bild: str):
+        new_bild = Bild(
+            bild=bild,
+            job_id=job.id
+        )
+        db.session.add(new_bild)
+        db.session.commit()
+        return new_bild
+    
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    @staticmethod
+    def getBild(id: int) -> Bild:
+        bild: Bild = Bild.query.get(id)
+        if not bild:
+            raise ElementDoesNotExsist(
+                f"Bild mit der ID {id} existiert nicht")
+        return bild
+    
+    @staticmethod
+    def getBilder(job: job) -> List[Bild]:
+        return Bild.query.filter_by(job_id=job.id).all()
