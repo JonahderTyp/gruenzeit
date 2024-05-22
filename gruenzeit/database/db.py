@@ -66,6 +66,14 @@ class job_status(db.Model, dictable):
     @staticmethod
     def getAll() -> dict[int, str]:
         return {i.id: i.name for i in job_status.query.all()}
+    
+    @staticmethod
+    def get(id: int) -> job_status:
+        status = job_status.query.get(id)
+        if not status:
+            raise ElementDoesNotExsist(
+                f"Status mit der ID {id} existiert nicht")
+        return status
 
 
 class job(db.Model, dictable):
@@ -85,7 +93,7 @@ class job(db.Model, dictable):
             name=name,
             adresse=adresse,
             beschreibung=beschreibung,
-            status_id=job_status.query.filter_by(name="In Planung").first().id
+            status_id=job_status.get(1).id
         )
         db.session.add(new_job)
         db.session.commit()

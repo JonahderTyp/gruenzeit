@@ -6,6 +6,7 @@ from ..database.db import user_type, user, TimeEntries, job, job_status
 from ..database.exceptions import ElementAlreadyExists, ElementDoesNotExsist
 from pprint import pprint
 from typing import List
+import base64
 
 baustelle_site = Blueprint("baustelle", __name__, url_prefix="/baustelle")
 
@@ -20,6 +21,25 @@ def auth():
 
 @baustelle_site.route("/", methods=["GET", "POST"])
 def overview():
+    with open("gruenzeit/static/baustelle.png", "rb") as image_file:
+        # Convert the image to base64
+        encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+
+    def jobToHtml(job: job):
+        images = job.bilder
+        if len(images) == 0:
+            images = [f"data:image/png;base64,{encoded_string}"]
+
+        return {
+            "id": job.id,
+            "nummer": job.auftragsnummer,
+            "name": job.name,
+            "adresse": job.adresse,
+            "beschreibung": job.beschreibung[:50],
+            "status": job_status.get(job.status_id).toDict(),
+            "bilder": images
+        }
+
     error_message = ""
     if request.method == "POST":
         autragsnummer = request.form.get("auftragsnummer").strip()
@@ -28,10 +48,19 @@ def overview():
         auftragsbeschreibung = request.form.get(
             "auftragsbeschreibung").strip().replace("\r\n", "\n")
         new_baustelle = job.createNew(autragsnummer, auftragsname,
-                                            auftragsadresse, auftragsbeschreibung)
+                                      auftragsadresse, auftragsbeschreibung)
         return redirect(url_for(".baustelle", id=new_baustelle.id))
-    bst: List[job] = job.query.all()
-    return render_template("baustelle/overview.html", baustellen=bst)
+
+    bst1: List[dict] = [jobToHtml(i)
+                        for i in job.getJobs(job_status.query.get(1))]
+    bst2: List[dict] = [jobToHtml(i)
+                        for i in job.getJobs(job_status.query.get(2))]
+
+    # pprint(bst1)
+
+    return render_template("baustelle/overview.html",
+                           baustellen1=bst1,
+                           baustellen2=bst2)
 
 
 @baustelle_site.route("/new", methods=["GET", "POST"])
@@ -44,7 +73,7 @@ def new():
         auftragsbeschreibung = request.form.get(
             "auftragsbeschreibung").strip().replace("\r\n", "\n")
         new_baustelle = job.createNew(autragsnummer, auftragsname,
-                                            auftragsadresse, auftragsbeschreibung)
+                                      auftragsadresse, auftragsbeschreibung)
         return redirect(url_for(".baustelle", id=new_baustelle.id))
     return render_template("baustelle/baustelle_new.html")
 
@@ -63,28 +92,42 @@ def edit(id):
     error_message = ""
     statuses = job_status.query.all()
     try:
-        bst = job.getJob(id).toHTML()
+        bst = job.getJob(id)
     except ElementDoesNotExsist as ex:
         error_message = repr(ex)
         abort(404)
+
     if request.method == "POST":
-        if "edit" in request.form:
-            auftragsnummer = request.form.get("auftragsnummer").strip()
-            auftragsname = request.form.get("auftragsname").strip()
-            auftragsadresse = request.form.get("auftragsadresse").strip()
-            auftragsbeschreibung = request.form.get(
+        pprint(request.form)
+        if "auftragsnummer" in request.form:
+            print("auftragsnummer gegeben")
+            bst.auftragsnummer = request.form.get("auftragsnummer").strip()
+
+        if "auftragsname" in request.form:
+            print("auftragsname gegeben")
+            bst.name = request.form.get("auftragsname").strip()
+
+        if "auftragsadresse" in request.form:
+            print("auftragsadresse gegeben")
+            bst.adresse = request.form.get("auftragsadresse").strip()
+
+        if "auftragsbeschreibung" in request.form:
+            print("auftragsbeschreibung gegeben")
+            bst.beschreibung = request.form.get(
                 "auftragsbeschreibung").strip().replace("\r\n", "\n")
-            bst.edit(auftragsnummer, auftragsname,
-                     auftragsadresse, auftragsbeschreibung)
-            return redirect(url_for(".baustelle", id=id))
-        elif "delete" in request.form:
-            bst = job.query.get(id)
-            bst.delete()
-            return redirect(url_for(".baustellen"))
-        elif "status" in request.form:
-            status = request.form.get("status")
-            bst = job.query.get(id)
-            bst.status = status
-            bst.save()
-            return redirect(url_for(".baustelle", id=id))
+
+        if "status" in request.form:
+            print("status gegeben")
+
+            try:
+                status = int(request.form.get("status"))
+                job_status.get(status)
+            except Exception as ex:
+                abort(400)
+                error_message = "Status existiert nicht"
+                return render_template("baustelle/baustelleedit.html", baustelle=bst, statuses=statuses, error_message=error_message)
+            bst.status_id = status
+
+        return redirect(url_for(".baustelle", id=id))
+
     return render_template("baustelle/baustelleedit.html", baustelle=bst, statuses=statuses, error_message=error_message)
