@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, abort
 from flask_login import current_user
 from flask_login.utils import login_required, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
-from ..database.db import user_type, user, TimeEntries, job, job_status
+from ..database.db import user_type, user, TimeEntries, job, job_status, Bild
 from ..database.exceptions import ElementAlreadyExists, ElementDoesNotExsist
 from pprint import pprint
 from typing import List
@@ -72,8 +72,18 @@ def new():
         auftragsadresse = request.form.get("auftragsadresse").strip()
         auftragsbeschreibung = request.form.get(
             "auftragsbeschreibung").strip().replace("\r\n", "\n")
+        
         new_baustelle = job.createNew(autragsnummer, auftragsname,
                                       auftragsadresse, auftragsbeschreibung)
+
+        if 'file' in request.files:
+            files = request.files.getlist('file')
+            for file in files:
+                if file:
+                    content = base64.b64encode(
+                        file.stream.read()).decode('utf-8')
+                    Bild.uploadImage(new_baustelle, content)
+
         return redirect(url_for(".baustelle", id=new_baustelle.id))
     return render_template("baustelle/baustelle_new.html")
 
