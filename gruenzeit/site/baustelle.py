@@ -142,3 +142,26 @@ def edit(id):
         return redirect(url_for(".baustelle", id=id))
 
     return render_template("baustelle/baustelleedit.html", baustelle=bst, statuses=statuses, error_message=error_message)
+
+
+@baustelle_site.route("/encode", methods=["GET", "POST"])
+def encode():
+    error_message = ""
+    if request.method == "POST":
+        autragsnummer = request.form.get("auftragsnummer").strip()
+        auftragsname = request.form.get("auftragsname").strip()
+        auftragsadresse = request.form.get("auftragsadresse").strip()
+        auftragsbeschreibung = request.form.get(
+            "auftragsbeschreibung").strip().replace("\r\n", "\n")
+
+        if 'file' in request.files:
+            files = request.files.getlist('file')
+            for file in files:
+                if file:
+                    content = base64.b64encode(
+                        file.stream.read()).decode('utf-8')
+                    return content
+
+        abort(400)
+    return render_template("baustelle/baustelle_new.html")
+    
