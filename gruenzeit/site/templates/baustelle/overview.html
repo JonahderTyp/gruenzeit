@@ -1,0 +1,29 @@
+{% extends "baustelle/base.html" %}
+{% set active_tab = 'overview' %}
+{% block title %}Baustelle Übersicht{% endblock %}
+
+{% block nav_content %}
+<h1>Baustellen</h1>
+
+<div class="container mt-5">
+    <h1>1</h1>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for baustelle in baustellen1 %}
+        <div class="col">
+            <div class="card h-100">
+                {% for image in baustelle.bilder %}
+                <img src="{{image}}" class="card-img-top">
+                {% endfor %}
+                <div class="card-body">
+                    <a href="{{baustelle.id}}" class="stretched-link"><h5 class="card-title">{{baustelle.nummer}}</h5></a>
+                    <h6 class="card-subtitle mb-2 text-body-secondary">{{baustelle.name}}</h6>
+                    <h6 class="card-subtitle mb-2 text-body-secondary">{{baustelle.status.name}}</h6>
+                    <p class="card-text">{{baustelle.adresse}}</p>
+                    <p class="card-text">{{baustelle.beschreibung}}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{%endblock%}

@@ -66,6 +66,14 @@ class job_status(db.Model, dictable):
     @staticmethod
     def getAll() -> dict[int, str]:
         return {i.id: i.name for i in job_status.query.all()}
+    
+    @staticmethod
+    def get(id: int) -> job_status:
+        status = job_status.query.get(id)
+        if not status:
+            raise ElementDoesNotExsist(
+                f"Status mit der ID {id} existiert nicht")
+        return status
 
 
 class job(db.Model, dictable):
@@ -85,7 +93,7 @@ class job(db.Model, dictable):
             name=name,
             adresse=adresse,
             beschreibung=beschreibung,
-            status_id=job_status.query.filter_by(name="In Planung").first().id
+            status_id=job_status.get(1).id
         )
         db.session.add(new_job)
         db.session.commit()
@@ -246,3 +254,30 @@ class Bild(db.Model, dictable):
     id = Column(Integer, primary_key=True, autoincrement=True)
     bild = Column(String(), nullable=True)
     job_id = Column(Integer, ForeignKey('job.id'))
+
+
+    @staticmethod
+    def uploadImage(job: job, bild: str):
+        new_bild = Bild(
+            bild=bild,
+            job_id=job.id
+        )
+        db.session.add(new_bild)
+        db.session.commit()
+        return new_bild
+    
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    @staticmethod
+    def getBild(id: int) -> Bild:
+        bild: Bild = Bild.query.get(id)
+        if not bild:
+            raise ElementDoesNotExsist(
+                f"Bild mit der ID {id} existiert nicht")
+        return bild
+    
+    @staticmethod
+    def getBilder(job: job) -> List[Bild]:
+        return Bild.query.filter_by(job_id=job.id).all()

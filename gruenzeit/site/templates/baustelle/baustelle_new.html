@@ -1,7 +1,8 @@
-{% extends "base.html" %}
+{% extends "baustelle/base.html" %}
+{% set active_tab = 'new' %}
 {% block title %}Neue Baustelle{% endblock %}
-{% block content %}
-<form method="post">
+{% block nav_content %}
+<form method="post"  enctype="multipart/form-data">
     <div class="mb-3">
         <div class="form-floating mb-3 mt-3">
             <input type="auftragsnummer" class="form-control" name="auftragsnummer" id="auftragsnummer">
@@ -23,6 +24,10 @@
     <div class="mb-3">
         <label for="auftragsbeschreibung" class="form-label">Auftragsbeschreibung</label>
         <textarea class="form-control" name="auftragsbeschreibung" id="auftragsbeschreibung" rows="10"></textarea>
+    </div>
+    <div class="mb-3">
+        <label for="formFileMultiple" class="form-label">Bilder</label>
+        <input class="form-control" type="file" id="formFileMultiple" name="file" accept="image/*" multiple>
     </div>
     <div class="col-12">
         <div class="d-grid my-3">

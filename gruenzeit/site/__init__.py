@@ -31,7 +31,7 @@ def inject_views():
                                 ]})
     if usr.user_type_id <= 2:
         views.append({"name": "Baustellen",
-                      "url": url_for("site.baustelle.baustellen")})
+                      "url": url_for("site.baustelle.overview")})
     if usr.user_type_id <= 3:
         views.append({"name": "Stempeln",
                       "url": url_for("site.stempel.overview")})
