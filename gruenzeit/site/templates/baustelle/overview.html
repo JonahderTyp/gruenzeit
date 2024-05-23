@@ -11,11 +11,11 @@
         {% for baustelle in baustellen1 %}
         <div class="col">
             <div class="card h-100">
-                {% for image in baustelle.bilder %}
-                <img src="{{image}}" class="card-img-top">
-                {% endfor %}
+                <img src="{{baustelle.bilder}}" class="card-img-top">
                 <div class="card-body">
-                    <a href="{{baustelle.id}}" class="stretched-link"><h5 class="card-title">{{baustelle.nummer}}</h5></a>
+                    <a href="{{baustelle.id}}" class="stretched-link">
+                        <h5 class="card-title">{{baustelle.nummer}}</h5>
+                    </a>
                     <h6 class="card-subtitle mb-2 text-body-secondary">{{baustelle.name}}</h6>
                     <h6 class="card-subtitle mb-2 text-body-secondary">{{baustelle.status.name}}</h6>
                     <p class="card-text">{{baustelle.adresse}}</p>
