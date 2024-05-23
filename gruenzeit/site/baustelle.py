@@ -141,7 +141,7 @@ def edit(id):
 
         return redirect(url_for(".baustelle", id=id))
 
-    return render_template("baustelle/baustelleedit.html", baustelle=bst, statuses=statuses, error_message=error_message)
+    return render_template("baustelle/baustelleedit.html", baustelle=bst.toHTML(), statuses=statuses, error_message=error_message)
 
 
 @baustelle_site.route("/encode", methods=["GET", "POST"])
