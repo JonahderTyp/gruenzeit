@@ -7,6 +7,7 @@ from ..database.exceptions import ElementAlreadyExists, ElementDoesNotExsist
 from pprint import pprint
 from typing import List
 import base64
+from .forms import BaustelleForm
 
 baustelle_site = Blueprint("baustelle", __name__, url_prefix="/baustelle")
 
@@ -21,14 +22,14 @@ def auth():
 
 @baustelle_site.route("/", methods=["GET", "POST"])
 def overview():
-    with open("gruenzeit/static/baustelle.png", "rb") as image_file:
-        # Convert the image to base64
-        encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
-
     def jobToHtml(job: job):
-        images = job.bilder
+        images = [i.bild for i in job.bilder]
         if len(images) == 0:
-            images = [f"data:image/png;base64,{encoded_string}"]
+            with open("gruenzeit/static/baustelle.png", "rb") as image_file:
+                # Convert the image to base64
+                encoded_string = base64.b64encode(
+                    image_file.read()).decode('utf-8')
+            images = [encoded_string]
 
         return {
             "id": job.id,
@@ -37,7 +38,7 @@ def overview():
             "adresse": job.adresse,
             "beschreibung": job.beschreibung[:50],
             "status": job_status.get(job.status_id).toDict(),
-            "bilder": images
+            "bilder": f"data:image/png;base64,{images[0]}"
         }
 
     error_message = ""
@@ -100,48 +101,47 @@ def baustelle(id):
 
 @baustelle_site.route("/<int:id>/edit", methods=["GET", "POST"])
 def edit(id):
+    # if request.method == "POST":
+    #     form = BaustelleForm(request.POST)
+
     error_message = ""
-    statuses = job_status.query.all()
+    statuses: List[job_status] = job_status.query.all()
+    form: BaustelleForm = BaustelleForm()
+    form.status.choices = [(status.id, status.name) for status in statuses]
+
     try:
         bst = job.getJob(id)
     except ElementDoesNotExsist as ex:
         error_message = repr(ex)
         abort(404)
 
-    if request.method == "POST":
-        pprint(request.form)
-        if "auftragsnummer" in request.form:
-            print("auftragsnummer gegeben")
-            bst.auftragsnummer = request.form.get("auftragsnummer").strip()
+    if form.is_submitted():
+        print("Form submitted")
+        if form.validate():
+            print("Form validated")
+            if form.submit_update.data:
+                bst.auftragsnummer = form.auftragsnummer.data.strip()
+                bst.name = form.auftragsname.data.strip()
+                bst.adresse = form.auftragsadresse.data.strip()
+                bst.beschreibung = form.auftragsbeschreibung.data.strip().replace("\r\n", "\n")
+                bst.status_id = form.status.data
+                bst.edit(bst.auftragsnummer, bst.name,
+                         bst.adresse, bst.beschreibung)
+                return redirect(url_for(".baustelle", id=id))
+            elif form.submit_delete.data:
+                job.deleteJob(id)
+                return redirect(url_for(".baustellen"))
+        else:
+            pprint(form.errors)
 
-        if "auftragsname" in request.form:
-            print("auftragsname gegeben")
-            bst.name = request.form.get("auftragsname").strip()
+    # Pre-fill the form with existing job data
+    form.auftragsnummer.data = bst.auftragsnummer
+    form.auftragsname.data = bst.name
+    form.auftragsadresse.data = bst.adresse
+    form.auftragsbeschreibung.data = bst.beschreibung
+    form.status.data = bst.status_id
 
-        if "auftragsadresse" in request.form:
-            print("auftragsadresse gegeben")
-            bst.adresse = request.form.get("auftragsadresse").strip()
-
-        if "auftragsbeschreibung" in request.form:
-            print("auftragsbeschreibung gegeben")
-            bst.beschreibung = request.form.get(
-                "auftragsbeschreibung").strip().replace("\r\n", "\n")
-
-        if "status" in request.form:
-            print("status gegeben")
-
-            try:
-                status = int(request.form.get("status"))
-                job_status.get(status)
-            except Exception as ex:
-                abort(400)
-                error_message = "Status existiert nicht"
-                return render_template("baustelle/baustelleedit.html", baustelle=bst, statuses=statuses, error_message=error_message)
-            bst.status_id = status
-
-        return redirect(url_for(".baustelle", id=id))
-
-    return render_template("baustelle/baustelleedit.html", baustelle=bst.toHTML(), statuses=statuses, error_message=error_message)
+    return render_template("baustelle/baustelleedit.html", form=form, baustelle=bst.toHTML(), statuses=statuses, error_message=error_message)
 
 
 @baustelle_site.route("/encode", methods=["GET", "POST"])
@@ -164,4 +164,3 @@ def encode():
 
         abort(400)
     return render_template("baustelle/baustelle_new.html")
-    

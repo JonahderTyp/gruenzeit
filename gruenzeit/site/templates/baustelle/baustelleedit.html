@@ -1,59 +1,50 @@
 {% extends "base.html" %}
 {% block title %}Baustellen{% endblock %}
 {% block content %}
+<div class="card mt-3">
+    <div class="card-body">
+        <h5 class="card-title">Baustelle #{{ baustelle.auftragsnummer }}</h5>
 
-<h1>Baustelle</h1>
-{{baustelle}}
+        <!-- Edit form -->
+        <form method="POST" action="{{ url_for('.edit', id=baustelle.id) }}">
+            {{ form.hidden_tag() }}
+            <!-- Nummer -->
+            <div class="form-floating mb-3">
+                {{ form.auftragsnummer(class="form-control") }}
+                <label for="auftragsnummer" class="form-label">Auftragsnummer</label>
+            </div>
 
-<div class="container mt-5">
-    <h1>Baustelle</h1>
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title">Baustelle #{{ baustelle.auftragsnummer }}</h5>
 
-            <!-- Edit form -->
-            <form method="POST" action="{{ url_for('.edit', id=baustelle.id) }}">
-                <!-- Name -->
-                <div class=" form-floating mb-3">
-                    <input type="text" class="form-control" id="auftragsname" name="auftragsname"
-                        value="{{ baustelle.name }}">
-                    <label for="auftragsname" class="form-label">Auftragsname</label>
-                </div>
+            <!-- Name -->
+            <div class="form-floating mb-3">
+                {{ form.auftragsname(class="form-control") }}
+                <label for="auftragsname" class="form-label">Auftragsname</label>
+            </div>
 
-                <!-- Address -->
-                <div class="form-floating mb-3">
-                    <input type="text" class="form-control" id="auftragsadresse" name="auftragsadresse"
-                        value="{{ baustelle.adresse }}">
-                    <label for="auftragsadresse" class="form-label">Adresse</label>
-                </div>
+            <!-- Address -->
+            <div class="form-floating mb-3">
+                {{ form.auftragsadresse(class="form-control") }}
+                <label for="auftragsadresse" class="form-label">Adresse</label>
+            </div>
 
-                <!-- Description -->
-                <div class=" mb-3">
-                    <label for="auftragsbeschreibung" class="form-label">Beschreibung:</label>
-                    <textarea class="form-control" id="auftragsbeschreibung" name="auftragsbeschreibung"
-                        rows="4">{{ "\n".join(baustelle.beschreibung) }}</textarea>
-                </div>
+            <!-- Description -->
+            <div class="mb-3">
+                <label for="auftragsbeschreibung" class="form-label">Beschreibung:</label>
+                {{ form.auftragsbeschreibung(class="form-control", rows="4") }}
+            </div>
 
-                <!-- Status -->
-                <div class="mb-3">
-                    <label for="status" class="form-label"><strong>Status:</strong></label>
-                    <select class="form-select" id="status" name="status">
-                        {% for status in statuses %}
-                        <option value="{{ status.id }}" {{ 'selected' if baustelle.status_id==status.id else '' }}>
-                            {{ status.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
+            <!-- Status -->
+            <div class="mb-3">
+                <label for="status" class="form-label"><strong>Status:</strong></label>
+                {{ form.status(class="form-select") }}
+            </div>
 
-                <!-- Form buttons -->
-                <div class="d-flex justify-content-between">
-                    <button type="submit" name="edit" class="btn btn-primary">Update</button>
-                    <button type="submit" name="delete" class="btn btn-danger">Delete</button>
-                </div>
-            </form>
-        </div>
+            <!-- Form buttons -->
+            <div class="d-flex justify-content-between">
+                {{ form.submit_update(class="btn btn-primary") }}
+                {{ form.submit_delete(class="btn btn-danger") }}
+            </div>
+        </form>
     </div>
 </div>
-
-
 {% endblock %}

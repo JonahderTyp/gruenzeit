@@ -5,3 +5,5 @@ SQLAlchemy
 Flask-DB
 Flask-SQLAlchemy
 Flask-Login
+WTForms
+Flask-WTF

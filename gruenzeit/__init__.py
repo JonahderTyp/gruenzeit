@@ -29,6 +29,8 @@ def create_app():
     # app.config['SESSION_COOKIE_SECURE'] = False
     # app.config['SQLALCHEMY_ECHO'] = True
 
+    app.config['WTF_CSRF_ENABLED'] = True
+
     from .database import db
     db.init_app(app)
 

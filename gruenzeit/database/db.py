@@ -84,7 +84,7 @@ class job(db.Model, dictable):
     adresse = Column(String(), nullable=True)
     beschreibung = Column(String(), nullable=True)
     status_id = Column(Integer, ForeignKey('job_status.id'))
-    bilder = relationship('Bild', backref='job')
+    bilder : Mapped[List[Bild]]  = relationship('Bild', backref='job')
 
     @staticmethod
     def createNew(auftragsnummer: str, name: str, adresse: str, beschreibung: str) -> job:
