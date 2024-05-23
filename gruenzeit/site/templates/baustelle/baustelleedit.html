@@ -1,59 +1,53 @@
 {% extends "base.html" %}
 {% block title %}Baustellen{% endblock %}
 {% block content %}
+<div class="card mt-3">
+    <div class="card-body">
+        <h5 class="card-title">Baustelle #{{ baustelle.auftragsnummer }}</h5>
 
-<h1>Baustelle</h1>
-{{baustelle}}
+        <!-- Edit form -->
+        <form method="POST" action="{{ url_for('.edit', id=baustelle.id) }}">
+            <!-- Name -->
+            <div class=" form-floating mb-3">
+                <input type="text" class="form-control" id="auftragsname" name="auftragsname"
+                    value="{{ baustelle.name }}">
+                <label for="auftragsname" class="form-label">Auftragsname</label>
+            </div>
 
-<div class="container mt-5">
-    <h1>Baustelle</h1>
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title">Baustelle #{{ baustelle.auftragsnummer }}</h5>
+            <!-- Address -->
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control" id="auftragsadresse" name="auftragsadresse"
+                    value="{{ baustelle.adresse }}">
+                <label for="auftragsadresse" class="form-label">Adresse</label>
+            </div>
 
-            <!-- Edit form -->
-            <form method="POST" action="{{ url_for('.edit', id=baustelle.id) }}">
-                <!-- Name -->
-                <div class=" form-floating mb-3">
-                    <input type="text" class="form-control" id="auftragsname" name="auftragsname"
-                        value="{{ baustelle.name }}">
-                    <label for="auftragsname" class="form-label">Auftragsname</label>
-                </div>
+            <!-- Description -->
+            <div class=" mb-3">
+                <label for="auftragsbeschreibung" class="form-label">Beschreibung:</label>
+                <textarea class="form-control" id="auftragsbeschreibung" name="auftragsbeschreibung"
+                    rows="4">{{ "\n".join(baustelle.beschreibung) }}</textarea>
+            </div>
 
-                <!-- Address -->
-                <div class="form-floating mb-3">
-                    <input type="text" class="form-control" id="auftragsadresse" name="auftragsadresse"
-                        value="{{ baustelle.adresse }}">
-                    <label for="auftragsadresse" class="form-label">Adresse</label>
-                </div>
+            <!-- Status -->
+            <div class="mb-3">
+                <label for="status" class="form-label"><strong>Status:</strong></label>
+                <select class="form-select" id="status" name="status">
+                    {% for status in statuses %}
+                    <option value="{{ status.id }}" {{ 'selected' if baustelle.status_id==status.id else '' }}>
+                        {{ status.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
 
-                <!-- Description -->
-                <div class=" mb-3">
-                    <label for="auftragsbeschreibung" class="form-label">Beschreibung:</label>
-                    <textarea class="form-control" id="auftragsbeschreibung" name="auftragsbeschreibung"
-                        rows="4">{{ "\n".join(baustelle.beschreibung) }}</textarea>
-                </div>
-
-                <!-- Status -->
-                <div class="mb-3">
-                    <label for="status" class="form-label"><strong>Status:</strong></label>
-                    <select class="form-select" id="status" name="status">
-                        {% for status in statuses %}
-                        <option value="{{ status.id }}" {{ 'selected' if baustelle.status_id==status.id else '' }}>
-                            {{ status.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <!-- Form buttons -->
-                <div class="d-flex justify-content-between">
-                    <button type="submit" name="edit" class="btn btn-primary">Update</button>
-                    <button type="submit" name="delete" class="btn btn-danger">Delete</button>
-                </div>
-            </form>
-        </div>
+            <!-- Form buttons -->
+            <div class="d-flex justify-content-between">
+                <button type="submit" name="edit" class="btn btn-primary">Update</button>
+                <button type="submit" name="delete" class="btn btn-danger">Delete</button>
+            </div>
+        </form>
     </div>
 </div>
+
 
 
 {% endblock %}
