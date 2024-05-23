@@ -49,6 +49,11 @@ def index():
     return redirect(url_for(".home"))
 
 
+@site.get("/favicon.ico")
+def favicon():
+    return redirect(url_for('static', filename='favicon.ico'))
+
+
 @site.route("/login", methods=["GET", "POST"])
 def login():
     print("login", current_user)
