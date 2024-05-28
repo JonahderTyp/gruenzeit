@@ -5,13 +5,11 @@
 
 {% block nav_content %}
 <div class="tab-pane fade show active" id="newtab" role="tabpanel">
-    <h2 class="text-center mb-2 mt-1">Deine Zeitleiste Heute</h2>
-    <div class="">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Neue Zeit Stempeln</h5>
-                <form action="{{ url_for('site.stempel.start')}}" id="timeForm" method="post"
-                    onsubmit="return validateTimes('startHour', 'startMinute', 'endHour', 'endMinute', 'pauseHour', 'pauseMinute', 'alertDiv');">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Neue Zeit Stempeln</h5>
+            <form action="{{ url_for('site.stempel.start')}}" id="timeForm" method="post"
+                onsubmit="return validateTimes('startHour', 'startMinute', 'endHour', 'endMinute', 'pauseHour', 'pauseMinute', 'alertDiv');">
                 <div id="alertDiv" class="alert alert-warning d-none" role="alert"></div>
                 <div class="row">
                     <div class="col-sm-4 mb-3 mb-sm-0">
@@ -69,8 +67,7 @@
                 <div class="d-grid gap-2 mt-3">
                     <button type="submit" class="btn btn-primary">Submit Time</button>
                 </div>
-                </form>
-            </div>
+            </form>
         </div>
     </div>
 </div>
