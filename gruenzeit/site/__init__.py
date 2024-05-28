@@ -20,6 +20,13 @@ def inject_views():
         return {"views": []}
     usr: user = current_user
     views = []
+    if usr.user_type_id <= 3:
+        views.append({"name": "Stempeln",
+                      "url": url_for("site.stempel.overview")})
+        views.append({"name": "Baustellen",
+                      "url": url_for("site.baustelle.overview")})
+    if usr.user_type_id <= 2:
+        pass
     if usr.user_type_id == 1:
         views.append({"name": "Einstellungen",
                       "multi": [{"name": "admin",
@@ -29,12 +36,6 @@ def inject_views():
                                 {"name": "Neuer Benutzer",
                                  "url": url_for("site.admin.addUser")},
                                 ]})
-    if usr.user_type_id <= 2:
-        views.append({"name": "Baustellen",
-                      "url": url_for("site.baustelle.overview")})
-    if usr.user_type_id <= 3:
-        views.append({"name": "Stempeln",
-                      "url": url_for("site.stempel.overview")})
     views.append({"name": "Logout",
                   "url": url_for("site.logout")})
     return {"views": views}
