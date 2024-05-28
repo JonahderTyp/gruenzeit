@@ -35,7 +35,9 @@ def addUser():
             try:
                 newUser = user.createNew(
                     username, name, generate_password_hash(password), usertype)
-                return redirect(url_for(".user", username=newUser.username))
+                print("NEW USER", newUser.toDict())
+                print("Username:", newUser.username)
+                return redirect(url_for(".getuser", username=newUser.username))
             except ElementAlreadyExists as ex:
                 error_message = repr(ex)
         else:
