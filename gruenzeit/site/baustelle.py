@@ -16,7 +16,7 @@ baustelle_site = Blueprint("baustelle", __name__, url_prefix="/baustelle")
 @login_required
 def auth():
     usr: user = current_user
-    if not usr.user_type_id <= 2:
+    if not usr.user_type_id <= 3:
         abort(401)
 
 
