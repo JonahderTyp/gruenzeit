@@ -2,4 +2,25 @@
 {% block title %}Export{% endblock %}
 {% block content %}
 <h1>Exportieren</h1>
+
+<form action="{{url_for('.userprint')}}" method="get">
+
+    <label for="exportDate">Start</label>
+    <input id="exportDate" class="form-control" type="date" name="date" />
+
+    <button type="submit" class="btn btn-primary">
+        Submit
+    </button>
+
+
+</form>
+
+
+
+
+
+<script>
+    document.getElementById('exportDate').value = new Date().toISOString().split('T')[0];
+</script>
+
 {% endblock %}
