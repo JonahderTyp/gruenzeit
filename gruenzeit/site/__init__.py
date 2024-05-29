@@ -6,12 +6,14 @@ from ..database.db import user
 from .admin import admin_site
 from .stempel import stempel_site
 from .baustelle import baustelle_site
+from .exports import exports_site
 
 site = Blueprint("site", __name__, template_folder="templates", url_prefix="/")
 
 site.register_blueprint(admin_site)
 site.register_blueprint(stempel_site)
 site.register_blueprint(baustelle_site)
+site.register_blueprint(exports_site)
 
 
 @site.context_processor
@@ -26,7 +28,8 @@ def inject_views():
         views.append({"name": "Baustellen",
                       "url": url_for("site.baustelle.overview")})
     if usr.user_type_id <= 2:
-        pass
+        views.append({"name": "Export",
+                      "url": url_for("site.exports.overview")})
     if usr.user_type_id == 1:
         views.append({"name": "Einstellungen",
                       "multi": [{"name": "admin",

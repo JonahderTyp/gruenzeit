@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Export {{ date }}{% endblock %}
+{% block navbar %}
+{% endblock %}
+{% block raw %}
+
+<div class="">
+    <div class="row">
+        <div class="col-4 text-start">Export vom {{ date }}</div>
+        <div class="col-4"></div>
+        <div class="col-4 text-end">
+            <a href="{{ url_for('.overview') }}"
+                class="btn"><i class="bi bi-house"></i></a>
+            <button onclick="window.print()" class="btn"><i class="bi bi-printer"></i></button>
+        </div>
+    </div>
+</div>
+
+
+
+<table class="table">
+    <tr>
+        <th> Mitarbeiter </th>
+        <th> Start Zeit</th>
+        <th> End Zeit</th>
+        <th> Arbeitszeit </th>
+        <th> Pausenzeit </th>
+        <th> Job ID </th>
+        <th> Job Name </th>
+    </tr>
+    {% for entry in entries %}
+    <tr>
+        <td>{{entry.user.name}}</td>
+        <td>{{ entry.start_time.str }}</td>
+        <td>{{ entry.end_time.str }}</td>
+        <td>{{ entry.work_time.str }}</td>
+        <td>{{ entry.pause_time.str }}</td>
+        <td>
+            {% if entry.job %}
+            {{ entry.job.auftragsnummer }}
+            {% endif %}
+        </td>
+        <td>
+            {% if entry.job %}
+            {{ entry.job.name }}
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}
