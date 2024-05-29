@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship, backref, Mapped
 from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey, Date
 from .exceptions import ElementAlreadyExists, ElementDoesNotExsist
 from typing import List, Dict
-from datetime import datetime
+from datetime import datetime, date
 import logging
 
 
@@ -236,6 +236,13 @@ class TimeEntries(db.Model, dictable):
     def getEntriesToday(usr: user) -> List[TimeEntries]:
         return TimeEntries.query.filter_by(user_id=usr.get_id()) \
             .filter(TimeEntries.start_time >= datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)) \
+            .order_by(TimeEntries.start_time.asc()).all()
+    
+    @staticmethod
+    def getEntriesOfDate(date: date = date.today()) -> List[TimeEntries]:
+        return TimeEntries.query \
+            .filter(TimeEntries.start_time >= datetime.combine(date, datetime.min.time())) \
+            .filter(TimeEntries.start_time <= datetime.combine(date, datetime.max.time())) \
             .order_by(TimeEntries.start_time.asc()).all()
 
 
