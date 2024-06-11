@@ -5,22 +5,6 @@ import random
 import logging
 
 
-def _seed_mitarbeiter():
-    mitarbeiter = [user(name=n) for n in [
-        "Lena Schröder",
-        "Tobias Müller",
-        "Katharina Vogel",
-        "Felix Richter",
-        "Martina Fischer",
-        "Niklas Weber",
-        "Julia Koch",
-        "Sven Meier",
-        "Anja Krause",
-        "David Lehmann",
-    ]]
-    db.session.bulk_save_objects(mitarbeiter)
-
-
 def seed_database():
     print("Seeding Database")
 
@@ -46,6 +30,10 @@ def seed_database():
     # _seed_mitarbeiter()
 
     user.createNew("admin", "admin", generate_password_hash("admin"), 1)
+    user.createNew("g", "Geschäftsführer", generate_password_hash("g"), 2)
+    user.createNew("m1", "Mitarbeiter1", generate_password_hash("m1"), 3)
+    user.createNew("m2", "Mitarbeiter2", generate_password_hash("m2"), 3)
+    user.createNew("m3", "Mitarbeiter3", generate_password_hash("m3"), 3)
 
     jobs = [
         job.createNew("1234567890", "Betonzaun", "Grüner Weg 1",
