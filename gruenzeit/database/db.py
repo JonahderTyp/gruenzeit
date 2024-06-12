@@ -2,7 +2,7 @@ from __future__ import annotations
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from sqlalchemy.orm import relationship, backref, Mapped
-from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey, Date
+from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey, Date, Boolean
 from .exceptions import ElementAlreadyExists, ElementDoesNotExsist
 from typing import List, Dict
 from datetime import datetime, date
@@ -153,7 +153,9 @@ class job(db.Model, dictable):
         db.session.commit()
 
     @staticmethod
-    def getJob(id: int) -> job:
+    def getJob(id: int | None) -> job:
+        if not id:
+            return None
         bst: job = job.query.get(id)
         if not bst:
             raise ElementDoesNotExsist(
@@ -197,6 +199,7 @@ class TimeEntries(db.Model, dictable):
     pause_time: int = Column(Integer, nullable=True)    # in minutes
     user_id = Column(Integer, ForeignKey('user.username'))
     job_id = Column(Integer, ForeignKey('job.id'))
+    is_team_entry = Column(Boolean, default=False)
     user: Mapped[user] = relationship('user', backref='time_entries')
     job: Mapped[job] = relationship('job', backref='time_entries')
 
@@ -205,7 +208,9 @@ class TimeEntries(db.Model, dictable):
                  start_time: datetime = None,
                  end_time: datetime = None,
                  pause_time: int = 0,
-                 job: job | None = None) -> TimeEntries:
+                 job: job | None = None,
+                 is_team_entry: bool = False,
+                 _prevent_reqursion: bool = False) -> TimeEntries:
         """
         Creates a new time entry in the database.
 
@@ -215,6 +220,7 @@ class TimeEntries(db.Model, dictable):
             end_time (datetime, optional): The end time of the time entry. Defaults to None.
             pause_time (int, optional): The pause time in minutes. Defaults to 0.
             job (Job, optional): The job associated with the time entry. Defaults to None.
+            is_team_entry (bool, optional): Indicates if the entry is for the team. Defaults to False.
 
         Returns:
             TimeEntries: The newly created time entry.
@@ -243,15 +249,22 @@ class TimeEntries(db.Model, dictable):
             start_time=start_time,
             end_time=end_time,
             pause_time=pause_time,
-            job_id=job.id if job else None
+            job_id=job.id if job else None,
+            is_team_entry=is_team_entry
         )
         print("New Entry", new_entry.toDict())
         db.session.add(new_entry)
         db.session.commit()
+
+        if is_team_entry and not _prevent_reqursion:
+            team_members = user.getTeamMembers()
+            for member in team_members:
+                if member.username != user.username:  # Avoid duplicating the entry for the user
+                    TimeEntries.newEntry(
+                        member, start_time, end_time, pause_time, job, True, True)
         return new_entry
 
-    def edit(self, start_time: datetime, end_time: datetime, pause_time: int, job: job | None):
-
+    def edit(self, start_time: datetime, end_time: datetime, pause_time: int, job: job | None, is_team_entry: bool = False, _prevent_reqursion: bool = False):
         if start_time.date() != end_time.date():
             raise ValueError("Start time and end time must be on the same day")
 
@@ -263,11 +276,35 @@ class TimeEntries(db.Model, dictable):
             raise ValueError(
                 "Pause time cannot be greater than the timespan between start time and end time")
 
+        original_start_time = self.start_time
+        original_end_time = self.end_time
+        original_pause_time = self.pause_time
+        original_job_id = self.job_id
+
         self.start_time = start_time
         self.end_time = end_time
         self.pause_time = pause_time
         self.job_id = job.id if job else None
+        self.is_team_entry = is_team_entry
         db.session.commit()
+
+        if is_team_entry and not _prevent_reqursion:
+            team_members = self.user.getTeamMembers()
+            for member in team_members:
+                if member.username != self.user.username:  # Avoid duplicating the entry for the user
+                    existing_entrys: List[TimeEntries] = TimeEntries.query.filter_by(
+                        user_id=member.username,
+                        start_time=original_start_time,
+                        end_time=original_end_time,
+                        pause_time=original_pause_time,
+                        job_id=original_job_id,
+                        is_team_entry=self.is_team_entry).all()
+                    if len(existing_entrys) == 1:
+                        existing_entrys[0].edit(
+                            self.start_time, self.end_time, self.pause_time, job.getJob(self.job_id), True, True)
+                    elif len(existing_entrys) > 1:
+                        print(
+                            "There are multiple entries for the same time. This should not happen")
 
     @staticmethod
     def getEntry(id: int) -> TimeEntries:

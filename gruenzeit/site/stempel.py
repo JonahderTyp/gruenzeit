@@ -96,9 +96,6 @@ def edit(id):
     if entry.user != usr:
         return abort(403)
 
-    print("Edditing Entry", entry.toDict())
-    print(request.form)
-
     starthours = request.form.get("starthours")
     startminutes = request.form.get("startminutes")
     endhours = request.form.get("endhours")
@@ -106,6 +103,7 @@ def edit(id):
     pausehours = request.form.get("pausehours")
     pauseminutes = request.form.get("pauseminutes")
     baustelle_id = request.form.get("baustelle")
+    is_team_entry = request.form.get("teamCheck") is not None
 
     if not starthours or not startminutes or not endhours or not endminutes:
         return abort(400)
@@ -128,8 +126,8 @@ def edit(id):
         return abort(400)
 
     try:
-        TimeEntries.edit(entry, start_time, end_time, pause_time,
-                         job.getJob(baustelle_id) if baustelle_id else None)
+        entry.edit(start_time, end_time, pause_time,
+                   job.getJob(baustelle_id) if baustelle_id else None, is_team_entry)
     except ValueError as ex:
         print(ex)
         return abort(400)
@@ -141,7 +139,6 @@ def edit(id):
 def start():
     usr: user = current_user
     if request.method == "POST":
-        print(request.form)
         starthours = request.form.get("starthours")
         startminutes = request.form.get("startminutes")
         endhours = request.form.get("endhours")
@@ -149,7 +146,8 @@ def start():
         pausehours = request.form.get("pausehours")
         pauseminutes = request.form.get("pauseminutes")
         baustelle_id = request.form.get("baustelle")
-        print(baustelle_id)
+        is_team_entry = request.form.get("teamCheck") is not None
+
         if not starthours or not startminutes or not endhours or not endminutes:
             return abort(400)
         try:
@@ -170,7 +168,7 @@ def start():
             return abort(400)
         try:
             TimeEntries.newEntry(usr, start_time, end_time, pause_time,
-                                 job.getJob(baustelle_id) if baustelle_id else None)
+                                 job.getJob(baustelle_id) if baustelle_id else None, is_team_entry)
         except ElementAlreadyExists as ex:
             print(ex)
             return abort(400)
