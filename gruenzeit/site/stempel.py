@@ -1,10 +1,8 @@
 from flask import Blueprint, render_template, request, redirect, url_for, abort
 from flask_login import current_user
-from flask_login.utils import login_required, login_user, logout_user
-from werkzeug.security import check_password_hash, generate_password_hash
-from ..database.db import user_type, user, TimeEntries, job, job_status
+from flask_login.utils import login_required
+from ..database.db import user, TimeEntries, job, job_status
 from ..database.exceptions import ElementAlreadyExists, ElementDoesNotExsist
-from pprint import pprint
 from datetime import datetime, timedelta
 from typing import List
 
@@ -50,11 +48,7 @@ def overview():
             "job": entry.job.toDict() if entry.job else None,
         })
 
-    # userstatus = TimeEntries.getUnfinishedEntries(usr)
     current_time = datetime.now()
-
-    # pprint(timetypes)
-
     current_hour = ("0" + str(current_time.hour))[-2:]
     current_minute = ("0" + str((current_time.minute // 15)*15))[-2:]
 

@@ -1,15 +1,12 @@
-from flask import Blueprint, render_template, request, redirect, url_for, abort
+from flask import Blueprint, render_template, request
 from flask_login.utils import login_required
 from ..database.db import TimeEntries
-from pprint import pprint
 from datetime import datetime, date, timedelta
 from typing import List
 
 exports_site = Blueprint("exports", __name__, url_prefix="/exports")
 
 # reqire the user to be logged in
-
-
 @exports_site.before_request
 @login_required
 def before_request():

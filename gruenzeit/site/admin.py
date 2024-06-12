@@ -1,10 +1,9 @@
 from flask import Blueprint, render_template, request, redirect, url_for, abort
 from flask_login import current_user
-from flask_login.utils import login_required, login_user, logout_user
-from werkzeug.security import check_password_hash, generate_password_hash
+from flask_login.utils import login_required
+from werkzeug.security import generate_password_hash
 from ..database.db import user_type, user
-from ..database.exceptions import ElementAlreadyExists, ElementDoesNotExsist
-from pprint import pprint
+from ..database.exceptions import ElementAlreadyExists
 
 admin_site = Blueprint("admin", __name__, url_prefix="/admin")
 
@@ -52,8 +51,6 @@ def users():
     users = [i.__dict__ for i in user.query.all()]
     for usr in users:
         usr["user_type"] = user_type.query.get(usr['user_type_id']).name
-
-    pprint(users)
     return render_template("admin/users.html", user=users)
 
 

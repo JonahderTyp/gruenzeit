@@ -1,10 +1,8 @@
 from flask import Blueprint, render_template, request, redirect, url_for, abort
 from flask_login import current_user
-from flask_login.utils import login_required, login_user, logout_user
-from werkzeug.security import check_password_hash, generate_password_hash
-from ..database.db import user_type, user, TimeEntries, job, job_status, Bild
-from ..database.exceptions import ElementAlreadyExists, ElementDoesNotExsist
-from pprint import pprint
+from flask_login.utils import login_required
+from ..database.db import user, job, job_status, Bild
+from ..database.exceptions import ElementDoesNotExsist
 from typing import List
 import base64
 from .forms import BaustelleForm
@@ -57,8 +55,6 @@ def overview():
     bst2: List[dict] = [jobToHtml(i)
                         for i in job.getJobs(job_status.query.get(2))]
 
-    # pprint(bst1)
-
     return render_template("baustelle/overview.html",
                            baustellen1=bst1,
                            baustellen2=bst2)
@@ -93,7 +89,6 @@ def new():
 def baustelle(id):
     try:
         bst = job.getJob(id).toHTML()
-        pprint([i[:10] for i in bst.get("bilder")])
     except ElementDoesNotExsist as ex:
         abort(404)
     return render_template("baustelle/baustelle.html", baustelle=bst)
@@ -132,7 +127,7 @@ def edit(id):
                 job.deleteJob(id)
                 return redirect(url_for(".baustellen"))
         else:
-            pprint(form.errors)
+            print(form.errors)
 
     # Pre-fill the form with existing job data
     form.auftragsnummer.data = bst.auftragsnummer

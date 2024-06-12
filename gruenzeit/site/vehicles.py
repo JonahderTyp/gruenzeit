@@ -1,12 +1,7 @@
-from flask import Blueprint, render_template, request, redirect, url_for, abort
+from flask import Blueprint, render_template, redirect, url_for, abort
 from flask_login import current_user
-from flask_login.utils import login_required, login_user, logout_user
-from werkzeug.security import check_password_hash, generate_password_hash
+from flask_login.utils import login_required
 from ..database.db import user, vehicle
-from ..database.exceptions import ElementAlreadyExists, ElementDoesNotExsist
-from pprint import pprint
-from typing import List
-import base64
 from .forms import VehicleForm
 
 vehicle_site = Blueprint("vehicle", __name__, url_prefix="/fahrzeug")
