@@ -7,6 +7,8 @@ from .admin import admin_site
 from .stempel import stempel_site
 from .baustelle import baustelle_site
 from .exports import exports_site
+from .vehicles import vehicle_site
+from .team import team_site
 
 site = Blueprint("site", __name__, template_folder="templates", url_prefix="/")
 
@@ -14,6 +16,8 @@ site.register_blueprint(admin_site)
 site.register_blueprint(stempel_site)
 site.register_blueprint(baustelle_site)
 site.register_blueprint(exports_site)
+site.register_blueprint(vehicle_site)
+site.register_blueprint(team_site)
 
 
 @site.context_processor
@@ -22,14 +26,24 @@ def inject_views():
         return {"views": []}
     usr: user = current_user
     views = []
+
+    # Mitarbeiter, Geschäftsführung und Admin
     if usr.user_type_id <= 3:
         views.append({"name": "Stempeln",
                       "url": url_for("site.stempel.overview")})
         views.append({"name": "Baustellen",
                       "url": url_for("site.baustelle.overview")})
+        views.append({"name": "Team",
+                      "url": url_for("site.team.overview")})
+
+    # Geschäftsführung und Admin
     if usr.user_type_id <= 2:
         views.append({"name": "Export",
                       "url": url_for("site.exports.overview")})
+        views.append({"name": "Fahrzeuge",
+                      "url": url_for("site.vehicle.overview")})
+
+    # Admin
     if usr.user_type_id == 1:
         views.append({"name": "Einstellungen",
                       "multi": [{"name": "admin",

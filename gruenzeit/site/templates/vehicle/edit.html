@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Fahrzeug{% endblock %}
+
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Edit Vehicle</h2>
+    <form method="post">
+        {{ form.hidden_tag() }}
+        <div class="mb-3">
+            <div class="form-floating mb-3 mt-3">
+                {{ form.name(class="form-control") }}
+                <label for="name" class="form-label">Name</label>
+            </div>
+        </div>
+        <div class="mb-3">
+            <div class="form-floating mb-3">
+                {{ form.kennzeichen(class="form-control") }}
+                <label for="kennzeichen" class="form-label">Kennzeichen</label>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="d-grid my-3">
+                {{ form.submit(class="btn btn-primary btn-lg") }}
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

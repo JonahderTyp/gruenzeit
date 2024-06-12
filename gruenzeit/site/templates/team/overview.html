@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Team Overview</h2>
+    {% if current_vehicle %}
+    <div class="alert alert-info">
+        <h4>Du bist aktuell im Fahrzeug: {{ current_vehicle.name }} ({{ current_vehicle.kennzeichen }})</h4>
+        <p>Zusammen mit:</p>
+        <ul>
+            {% for member in team_members %}
+            <li>{{ member.name }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% else %}
+    <div class="alert alert-warning">
+        <h4>Du bist aktuell in keinem Fahrzeug.</h4>
+    </div>
+    {% endif %}
+
+    <!-- Trigger for the modal -->
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#vehicleModal">
+        Fahrzeug wechseln
+    </button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="vehicleModal" tabindex="-1" aria-labelledby="vehicleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="vehicleModalLabel">Fahrzeug wechseln</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="post">
+                    <div class="modal-body">
+                        {{ form.hidden_tag() }}
+                        <div class="mb-3">
+                            <div class="form-floating mb-3 mt-3">
+                                {{ form.vehicle(class="form-select") }}
+                                <label for="vehicle" class="form-label">Fahrzeug auswählen</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

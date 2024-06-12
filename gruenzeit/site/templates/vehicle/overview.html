@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Fahrzeug{% endblock %}
+
+
+{% block content %}
+<div class="mt-5">
+    <h2>Vehicle Overview</h2>
+    <a href="{{ url_for('.new') }}" class="btn btn-success mb-3">Add New Vehicle</a>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for vehicle in vehicles %}
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ vehicle.name }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ vehicle.kennzeichen }}</h6>
+                    <a href="{{ url_for('.edit', id=vehicle.id) }}" class="btn btn-primary">Edit</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

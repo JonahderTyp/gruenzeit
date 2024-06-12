@@ -1,5 +1,5 @@
 import os
-from .db import vehicle, db, user, user_type, job_status, job, Bild
+from .db import vehicle, db, user, user_type, job_status, job, Bild, vehicle
 from werkzeug.security import generate_password_hash
 import random
 import logging
@@ -7,12 +7,6 @@ import logging
 
 def seed_database():
     print("Seeding Database")
-
-    fahrzeuge = [
-        vehicle(id=1, name="Fahrzeug1", kennzeichen="BE JW 1"),
-        vehicle(id=2, name="Fahrzeug2", kennzeichen="BE JW 2"),
-    ]
-    db.session.bulk_save_objects(fahrzeuge)
 
     userTypes = [
         user_type(id=1, name="admin"),
@@ -34,6 +28,13 @@ def seed_database():
     user.createNew("m1", "Mitarbeiter1", generate_password_hash("m1"), 3)
     user.createNew("m2", "Mitarbeiter2", generate_password_hash("m2"), 3)
     user.createNew("m3", "Mitarbeiter3", generate_password_hash("m3"), 3)
+
+    vehicle.newVehicle("Toyota", "BE JW 7")
+    vehicle.newVehicle("V-Klasse", "BE SW 7")
+    vehicle.newVehicle("Iveco 4m", "BE W 1")
+    vehicle.newVehicle("Iveco 3m", "BE W 2")
+    vehicle.newVehicle("VW T4", "BE W 3")
+    vehicle.newVehicle("Ducato", "BE W 4")
 
     jobs = [
         job.createNew("1234567890", "Betonzaun", "Grüner Weg 1",
@@ -62,7 +63,8 @@ def seed_database():
             lines = [line.strip() for line in file]
 
         for _job in jobs:
-            random_numbers = random.sample(range(len(lines)), random.randint(0, 4))
+            random_numbers = random.sample(
+                range(len(lines)), random.randint(0, 4))
             for random_number in random_numbers:
                 Bild.uploadImage(_job, lines[random_number])
     except Exception as e:
