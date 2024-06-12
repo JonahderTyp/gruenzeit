@@ -126,9 +126,9 @@
                         <select class="form-select" name="baustelle" id="baustelle" aria-label="baustelle"
                             aria-describedby="baustelle">
 
-                            <option selected value="">Keine</option>
+                            <option value="">Keine</option>
                             {% for baustelle in baustellen %}
-                            <option value="{{baustelle.id}}">{{baustelle.name}}</option>
+                            <option value="{{baustelle.id}}" {% if baustelle.id == userTime.job.id %} selected {%endif%}>{{baustelle.name}} {% if baustelle.id == userTime.job.id %} [Aktuell] {%endif%}</option>
                             {%endfor%}
                         </select>
                     </div>
@@ -137,7 +137,7 @@
                         <input class="form-check-input" type="checkbox" value="" id="teamCheck{{userTime.id}}"
                             name="teamCheck">
                         <label class="form-check-label" for="teamCheck{{userTime.id}}">
-                            Apply to team
+                            Auf Fahrzeug Übertragen
                         </label>
                     </div>
 
