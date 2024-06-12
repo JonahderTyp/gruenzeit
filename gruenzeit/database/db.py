@@ -30,6 +30,7 @@ class user(db.Model, UserMixin, dictable):
     name = Column(String(255), nullable=True)
     password_hash = Column(String(255), nullable=True)
     user_type_id = Column(Integer, ForeignKey('user_type.id'), nullable=True)
+    vehicle_id = Column(Integer, ForeignKey('vehicle.id'), nullable=True)
 
     @staticmethod
     def createNew(username: str, name: str, password_hash, user_type_id) -> user:
@@ -46,6 +47,10 @@ class user(db.Model, UserMixin, dictable):
         db.session.commit()
         return new_user
 
+    def setVehicle(self, vehicle: vehicle):
+        self.vehicle_id = vehicle.id
+        db.session.commit()
+
     def get_id(self):
         return self.username
 
@@ -55,6 +60,37 @@ class vehicle(db.Model, dictable):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(45), nullable=True)
     kennzeichen = Column(String(45), nullable=True)
+
+    @staticmethod
+    def newVehicle(name: str, kennzeichen: str) -> vehicle:
+        new_vehicle = vehicle(
+            name=name,
+            kennzeichen=kennzeichen
+        )
+        db.session.add(new_vehicle)
+        db.session.commit()
+        return new_vehicle
+
+    @staticmethod
+    def getVehicle(id: int) -> vehicle:
+        vec: vehicle = vehicle.query.get(id)
+        if not vec:
+            raise ElementDoesNotExsist(
+                f"Fahrzeug mit der ID {id} existiert nicht")
+        return vec
+
+    @staticmethod
+    def getVehicles() -> List[vehicle]:
+        return vehicle.query.all()
+
+    def update(self, name: str, kennzeichen: str) -> None:
+        self.name = name
+        self.kennzeichen = kennzeichen
+        db.session.commit()
+
+    def delete(self) -> None:
+        db.session.delete(self)
+        db.session.commit()
 
 
 class job_status(db.Model, dictable):
@@ -66,7 +102,7 @@ class job_status(db.Model, dictable):
     @staticmethod
     def getAll() -> dict[int, str]:
         return {i.id: i.name for i in job_status.query.all()}
-    
+
     @staticmethod
     def get(id: int) -> job_status:
         status = job_status.query.get(id)
@@ -84,7 +120,7 @@ class job(db.Model, dictable):
     adresse = Column(String(), nullable=True)
     beschreibung = Column(String(), nullable=True)
     status_id = Column(Integer, ForeignKey('job_status.id'))
-    bilder : Mapped[List[Bild]]  = relationship('Bild', backref='job')
+    bilder: Mapped[List[Bild]] = relationship('Bild', backref='job')
 
     @staticmethod
     def createNew(auftragsnummer: str, name: str, adresse: str, beschreibung: str) -> job:
@@ -237,7 +273,7 @@ class TimeEntries(db.Model, dictable):
         return TimeEntries.query.filter_by(user_id=usr.get_id()) \
             .filter(TimeEntries.start_time >= datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)) \
             .order_by(TimeEntries.start_time.asc()).all()
-    
+
     @staticmethod
     def getEntriesOfDate(date: date = date.today()) -> List[TimeEntries]:
         return TimeEntries.query \
@@ -246,22 +282,11 @@ class TimeEntries(db.Model, dictable):
             .order_by(TimeEntries.start_time.asc()).all()
 
 
-class user_in_vehicle(db.Model, dictable):
-    __tablename__ = 'user_in_vehicle'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    date = Column(Date, nullable=False)
-    vehicle_id = Column(Integer, ForeignKey('vehicle.id'))
-    user_id = Column(Integer, ForeignKey('user.username'))
-    vehicle = relationship('vehicle', backref='user_in_vehicle')
-    user = relationship('user', backref='user_in_vehicle')
-
-
 class Bild(db.Model, dictable):
     __tablename__ = 'bild'
     id = Column(Integer, primary_key=True, autoincrement=True)
     bild = Column(String(), nullable=True)
     job_id = Column(Integer, ForeignKey('job.id'))
-
 
     @staticmethod
     def uploadImage(job: job, bild: str):
@@ -272,7 +297,7 @@ class Bild(db.Model, dictable):
         db.session.add(new_bild)
         db.session.commit()
         return new_bild
-    
+
     def delete(self):
         db.session.delete(self)
         db.session.commit()
@@ -284,7 +309,7 @@ class Bild(db.Model, dictable):
             raise ElementDoesNotExsist(
                 f"Bild mit der ID {id} existiert nicht")
         return bild
-    
+
     @staticmethod
     def getBilder(job: job) -> List[Bild]:
         return Bild.query.filter_by(job_id=job.id).all()
