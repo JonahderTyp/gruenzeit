@@ -47,9 +47,18 @@ class user(db.Model, UserMixin, dictable):
         db.session.commit()
         return new_user
 
-    def setVehicle(self, vehicle: vehicle):
-        self.vehicle_id = vehicle.id
+    def setVehicle(self, vehicle: vehicle | None):
+        if vehicle is None:
+            self.vehicle_id = None
+        else:
+            self.vehicle_id = vehicle.id
         db.session.commit()
+
+    def getVehicle(self) -> vehicle:
+        return vehicle.query.get(self.vehicle_id)
+
+    def getTeamMembers(self) -> List[user]:
+        return user.query.filter_by(vehicle_id=self.vehicle_id).all()
 
     def get_id(self):
         return self.username
