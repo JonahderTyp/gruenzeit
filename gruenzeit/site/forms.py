@@ -18,3 +18,9 @@ class VehicleForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     kennzeichen = StringField('Kennzeichen', validators=[DataRequired()])
     submit = SubmitField('Submit')
+
+
+class VehicleSelectForm(FlaskForm):
+    vehicle = SelectField('Vehicle', choices=[
+                          (-1, 'Kein Fahrzeug')], validators=[DataRequired()])
+    submit = SubmitField('Farhzeug wechseln')
