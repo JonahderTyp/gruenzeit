@@ -144,11 +144,11 @@ class job(db.Model, dictable):
         db.session.commit()
         return new_job
 
-    def set_status(self, status: str):
-        status = job_status.query.filter_by(name=status).first()
+    def set_status(self, statusID: int):
+        status = job_status.get(statusID)
         if not status:
             raise ElementDoesNotExsist(
-                f"Status \"{status}\" existiert nicht")
+                f"Status \"{statusID}\" existiert nicht")
         self.status_id = status.id
         db.session.commit()
 

@@ -71,4 +71,7 @@ def seed_database():
         logging.error("Error while seeding database")
         print(e)
 
+    jobs[0].set_status(2)
+    jobs[1].set_status(2)
+
     db.session.commit()
