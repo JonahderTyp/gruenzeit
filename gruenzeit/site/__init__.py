@@ -31,19 +31,19 @@ def inject_views():
     if usr.user_type_id <= 3:
         views.append({"name": "Stempeln",
                       "url": url_for("site.stempel.overview"),
-                      "description": "Stempelzeiten erfassen"})
+                      "description": "Erfasse Deine Arbeitszeiten"})
         views.append({"name": "Baustellen",
                       "url": url_for("site.baustelle.overview"),
-                      "description": "Baustellen verwalten"})
+                      "description": "Verwalte Baustellen"})
         views.append({"name": "Team",
                       "url": url_for("site.team.overview"),
-                      "description": "Team verwalten"})
+                      "description": "Verwalte Dein Team"})
 
     # Geschäftsführung und Admin
     if usr.user_type_id <= 2:
         views.append({"name": "Export",
                       "url": url_for("site.exports.overview"),
-                      "description": "Exportieren von Daten"})
+                      "description": "Zeiterfassung exportieren"})
         views.append({"name": "Fahrzeuge",
                       "url": url_for("site.vehicle.overview"),
                       "description": "Fahrzeuge verwalten"})

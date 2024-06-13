@@ -13,17 +13,13 @@
                     <h5 class="card-title">{{ view.name }}</h5>
                     <p class="card-text">{{ view.description }}</p>
                     {% if 'multi' in view %}
-                    {% for subview in view.multi %}
-                    <div class="card mb-2">
-                        <div class="card-body">
-                            <h6 class="card-title">{{ subview.name }}</h6>
-                            <p class="card-text">{{ subview.description }}</p>
-                            <a href="{{ subview.url }}" class="btn btn-secondary btn-sm">Go to {{ subview.name }}</a>
-                        </div>
+                    <div class="list-group">
+                        {% for subview in view.multi %}
+                        <a href="{{ subview.url }}" class="list-group-item list-group-item-action">{{ subview.name }}</a>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
                     {% else %}
-                    <a href="{{ view.url }}" class="btn btn-primary">Go to {{ view.name }}</a>
+                    <a href="{{ view.url }}" class="btn btn-primary">{{ view.name }}</a>
                     {% endif %}
                 </div>
             </div>
