@@ -3,9 +3,29 @@
 {% block title %}Baustelle Übersicht{% endblock %}
 
 {% block nav_content %}
-<div class="container">
+<div class="">
+    <h2>In Bearbeitung</h2>
     <div class="row row-cols-1 row-cols-md-3 g-4">
         {% for baustelle in baustellen1 %}
+        <div class="col">
+            <div class="card h-100">
+                <img src="{{baustelle.bilder}}" class="card-img-top">
+                <div class="card-body">
+                    <a href="{{baustelle.id}}" class="stretched-link">
+                        <h5 class="card-title">{{baustelle.nummer}}</h5>
+                    </a>
+                    <h6 class="card-subtitle mb-2 text-body-secondary">{{baustelle.name}}</h6>
+                    <h6 class="card-subtitle mb-2 text-body-secondary">{{baustelle.status.name}}</h6>
+                    <p class="card-text">{{baustelle.adresse}}</p>
+                    <p class="card-text">{{baustelle.beschreibung}}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <h2 class="mt-5">Fertiggestellt</h2>
+    <div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
+        {% for baustelle in baustellen2 %}
         <div class="col">
             <div class="card h-100">
                 <img src="{{baustelle.bilder}}" class="card-img-top">
