@@ -63,8 +63,7 @@ def overview():
 @stempel_site.route("/new", methods=["GET", "POST"])
 def new():
     usr: user = current_user
-    baustellen_active = job.getJobs(job_status.query.get(1)) \
-        + job.getJobs(job_status.query.get(2))
+    baustellen_active = job.getJobs(job_status.get(1))
 
     current_time = datetime.now()
     current_hour = ("0" + str(current_time.hour))[-2:]
