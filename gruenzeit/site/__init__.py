@@ -92,7 +92,7 @@ def login():
         print("User:", usr)
         # print("password:", password)
         # print("passwordHash:", user.password_hash)
-        if user and check_password_hash(usr.password_hash, password):
+        if usr and check_password_hash(usr.password_hash, password):
             login_user(usr, remember=True)
             # Log user ID to verify
             print("login successful, user id:", usr.username)
