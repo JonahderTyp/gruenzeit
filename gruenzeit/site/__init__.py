@@ -30,29 +30,38 @@ def inject_views():
     # Mitarbeiter, Geschäftsführung und Admin
     if usr.user_type_id <= 3:
         views.append({"name": "Stempeln",
-                      "url": url_for("site.stempel.overview")})
+                      "url": url_for("site.stempel.overview"),
+                      "description": "Stempelzeiten erfassen"})
         views.append({"name": "Baustellen",
-                      "url": url_for("site.baustelle.overview")})
+                      "url": url_for("site.baustelle.overview"),
+                      "description": "Baustellen verwalten"})
         views.append({"name": "Team",
-                      "url": url_for("site.team.overview")})
+                      "url": url_for("site.team.overview"),
+                      "description": "Team verwalten"})
 
     # Geschäftsführung und Admin
     if usr.user_type_id <= 2:
         views.append({"name": "Export",
-                      "url": url_for("site.exports.overview")})
+                      "url": url_for("site.exports.overview"),
+                      "description": "Exportieren von Daten"})
         views.append({"name": "Fahrzeuge",
-                      "url": url_for("site.vehicle.overview")})
+                      "url": url_for("site.vehicle.overview"),
+                      "description": "Fahrzeuge verwalten"})
 
     # Admin
     if usr.user_type_id == 1:
         views.append({"name": "Einstellungen",
                       "multi": [{"name": "admin",
-                                 "url": url_for("site.admin.admin")},
+                                 "url": url_for("site.admin.admin"),
+                                 "description": "Admin Einstellungen"},
                                 {"name": "Benutzer",
-                                 "url": url_for("site.admin.users")},
+                                 "url": url_for("site.admin.users"),
+                                 "description": "Benutzer verwalten"},
                                 {"name": "Neuer Benutzer",
-                                 "url": url_for("site.admin.addUser")},
-                                ]})
+                                 "url": url_for("site.admin.addUser"),
+                                 "description": "Neuen Benutzer anlegen"},
+                                ],
+                      "description": "Einstellungen"})
     views.append({"name": "Logout",
                   "url": url_for("site.logout")})
     return {"views": views}

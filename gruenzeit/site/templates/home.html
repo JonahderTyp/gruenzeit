@@ -1,5 +1,35 @@
 {% extends "base.html" %}
 {% block title %}Home{% endblock %}
 {% block content %}
-<h1>Hallo {{current_user.name}}</h1>
+<!-- Main content -->
+<div class="container mt-5">
+    <h2>Dashboard</h2>
+    <div class="row justify-content-center">
+        {% for view in views %}
+        {% if 'description' in view %}
+        <div class="col-md-4 mb-3 d-flex align-items-stretch">
+            <div class="card w-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ view.name }}</h5>
+                    <p class="card-text">{{ view.description }}</p>
+                    {% if 'multi' in view %}
+                    {% for subview in view.multi %}
+                    <div class="card mb-2">
+                        <div class="card-body">
+                            <h6 class="card-title">{{ subview.name }}</h6>
+                            <p class="card-text">{{ subview.description }}</p>
+                            <a href="{{ subview.url }}" class="btn btn-secondary btn-sm">Go to {{ subview.name }}</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <a href="{{ view.url }}" class="btn btn-primary">Go to {{ view.name }}</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
 {% endblock %}
