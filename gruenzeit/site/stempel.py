@@ -90,6 +90,12 @@ def edit(id):
 
     if entry.user != usr:
         return abort(403)
+    
+    request.form.get('action')
+    if request.form.get('action') == 'delete':
+        entry.delete()
+        return redirect(url_for(".overview"))
+
 
     starthours = request.form.get("starthours")
     startminutes = request.form.get("startminutes")

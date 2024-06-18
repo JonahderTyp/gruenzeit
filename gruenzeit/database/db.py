@@ -322,6 +322,11 @@ class TimeEntries(db.Model, dictable):
                         
     def getWorkTime(self) -> timedelta:
         return (self.end_time if self.end_time else datetime.now()) - self.start_time - timedelta(minutes=self.pause_time)
+    
+    def delete(self):
+        print("Deleting", self.toDict())
+        db.session.delete(self)
+        db.session.commit()
 
     @staticmethod
     def getEntry(id: int) -> TimeEntries:
