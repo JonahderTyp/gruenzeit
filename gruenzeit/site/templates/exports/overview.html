@@ -1,23 +1,41 @@
 {% extends "base.html" %}
 {% block title %}Export{% endblock %}
 {% block content %}
-<h1>Exportieren</h1>
+<div class="card mt-5">
+    <div class="card-header">
+        Täglicher Export
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('.dailyexport') }}" method="get">
+            <div class="mb-3">
+                <input id="exportDate" class="form-control" type="date" name="date" />
+            </div>
+            <button type="submit" class="btn btn-primary">
+                Exportieren
+            </button>
+        </form>
+    </div>
+</div>
 
-<form action="{{url_for('.userprint')}}" method="get">
-
-    <label for="exportDate">Start</label>
-    <input id="exportDate" class="form-control" type="date" name="date" />
-
-    <button type="submit" class="btn btn-primary">
-        Submit
-    </button>
-
-
-</form>
-
-
-
-
+<div class="card mt-5">
+    <div class="card-header">
+        Baustellen Export
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('.jobexport') }}" method="get">
+            <div class="mb-3">
+                <select class="form-select" aria-label="Default select example" name="jobid">
+                    {% for job in jobs %}
+                    <option value="{{ job.id }}">{{ job.auftragsnummer }} {{ job.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">
+                Exportieren
+            </button>
+        </form>
+    </div>
+</div>
 
 <script>
     document.getElementById('exportDate').value = new Date().toISOString().split('T')[0];

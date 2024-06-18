@@ -19,6 +19,7 @@
                 <p id="baustelleBeschreibung">{% for b in baustelle.beschreibung %} {{b}} <br> {% endfor %}</p>
             </div>
             <a href="{{ url_for('.edit', id=baustelle.id)}}" class="btn btn-primary">Bearbeiten</a>
+            <a href="{{ url_for('site.exports.jobexport', jobid=baustelle.id)}}" class="btn btn-primary">Exportieren</a>
 
 
             <div class="container mt-5">

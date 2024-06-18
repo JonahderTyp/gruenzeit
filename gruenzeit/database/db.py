@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship, backref, Mapped
 from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey, Date, Boolean
 from .exceptions import ElementAlreadyExists, ElementDoesNotExsist
 from typing import List, Dict
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 import logging
 
 
@@ -46,6 +46,14 @@ class user(db.Model, UserMixin, dictable):
         db.session.add(new_user)
         db.session.commit()
         return new_user
+    
+    @staticmethod
+    def getUser(username: str) -> user:
+        usr: user = user.query.get(username)
+        if not usr:
+            raise ElementDoesNotExsist(
+                f"User mit dem Benutzernamen \"{username}\" existiert nicht")
+        return usr
 
     def setVehicle(self, vehicle: vehicle | None):
         if vehicle is None:
@@ -163,8 +171,14 @@ class job(db.Model, dictable):
         return bst
 
     @staticmethod
-    def getJobs(status: job_status) -> List[job]:
+    def getJobs(status: job_status | None = None) -> List[job]:
+        if not status:
+            return job.query.all()
         return job.query.filter_by(status_id=status.id).all()
+    
+    def getTimestamps(self) -> List[TimeEntries]:
+        # Return all timestamps for this job
+        return TimeEntries.query.filter_by(job_id=self.id).all()
 
     def toHTML(self):
         bst = {
@@ -305,6 +319,9 @@ class TimeEntries(db.Model, dictable):
                     elif len(existing_entrys) > 1:
                         print(
                             "There are multiple entries for the same time. This should not happen")
+                        
+    def getWorkTime(self) -> timedelta:
+        return (self.end_time if self.end_time else datetime.now()) - self.start_time - timedelta(minutes=self.pause_time)
 
     @staticmethod
     def getEntry(id: int) -> TimeEntries:
