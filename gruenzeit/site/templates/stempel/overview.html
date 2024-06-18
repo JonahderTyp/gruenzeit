@@ -6,6 +6,11 @@
 {% block nav_content %}
 <div class="tab-pane fade show active" id="overview" role="tabpanel">
     <h2 class="text-center mb-2 mt-1">Deine Zeitleiste Heute</h2>
+    {% if overlapping_entries %}
+    <div class="alert alert-danger" role="alert">
+        Du hast sich überschneidende Zeiten. Bitte überprüfe deine Eingaben.
+    </div>
+    {%endif%}
     {% if not userTimesToday %}
     <div class="alert alert-warning" role="alert">
         Du hast heute noch keine Zeiten gestempelt.

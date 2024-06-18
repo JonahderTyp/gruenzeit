@@ -19,11 +19,20 @@ def before_request():
 
 @stempel_site.route("/", methods=["GET", "POST"])
 def overview():
+    def check_overlaps(entries: List[TimeEntries]):
+        sorted_entries = sorted(entries, key=lambda e: e.start_time)
+        for i in range(len(sorted_entries) - 1):
+            if sorted_entries[i].end_time and sorted_entries[i].end_time > sorted_entries[i + 1].start_time:
+                return True
+        return False
+
     usr: user = current_user
     baustellen_active = job.getJobs(job_status.query.get(1)) \
         + job.getJobs(job_status.query.get(2))
 
     userTimesToday: List[TimeEntries] = TimeEntries.getEntriesToday(usr)
+
+    overlapping_entries = check_overlaps(userTimesToday)
 
     stempelung: List[dict] = []
     for entry in userTimesToday:
@@ -55,7 +64,7 @@ def overview():
     return render_template("stempel/overview.html",
                            userTimesToday=stempelung,
                            baustellen=baustellen_active,
-                           #    timetypes=timetypes,
+                           overlapping_entries=overlapping_entries,
                            currHour=current_hour,
                            currMin=current_minute)
 
@@ -90,12 +99,11 @@ def edit(id):
 
     if entry.user != usr:
         return abort(403)
-    
+
     request.form.get('action')
     if request.form.get('action') == 'delete':
         entry.delete()
         return redirect(url_for(".overview"))
-
 
     starthours = request.form.get("starthours")
     startminutes = request.form.get("startminutes")
