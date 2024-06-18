@@ -64,6 +64,7 @@ def overview():
 def new():
     usr: user = current_user
     baustellen_active = job.getJobs(job_status.get(1))
+    is_in_team = usr.vehicle_id is not None
 
     current_time = datetime.now()
     current_hour = ("0" + str(current_time.hour))[-2:]
@@ -72,7 +73,8 @@ def new():
     return render_template("stempel/new.html",
                            baustellen=baustellen_active,
                            currHour=current_hour,
-                           currMin=current_minute)
+                           currMin=current_minute,
+                           isInTeam=is_in_team)
 
 
 @stempel_site.post("/edit/<int:id>")
