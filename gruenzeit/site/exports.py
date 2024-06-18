@@ -18,8 +18,8 @@ def overview():
     return render_template("exports/overview.html")
 
 
-@exports_site.get("/print")
-def userprint():
+@exports_site.get("/daily")
+def dailyexport():
     reqdateraw = request.args.get("date", date.today().isoformat())
     reqdate = datetime.fromisoformat(reqdateraw)
 
@@ -59,4 +59,4 @@ def userprint():
                 "id": entry.user.username}
         })
 
-    return render_template("exports/print.html", date=str(reqdate.date()) , entries=stempelung)
+    return render_template("exports/daily.html", date=str(reqdate.date()) , entries=stempelung)
