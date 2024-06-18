@@ -1,6 +1,6 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, abort
 from flask_login.utils import login_required
-from ..database.db import TimeEntries
+from ..database.db import TimeEntries, job, user
 from datetime import datetime, date, timedelta
 from typing import List
 
@@ -60,3 +60,46 @@ def dailyexport():
         })
 
     return render_template("exports/daily.html", date=str(reqdate.date()) , entries=stempelung)
+
+
+
+@exports_site.get("/jobexport")
+def jobexport():
+    jobid = request.args.get("jobid")
+    if not jobid:
+        return abort(400, "No job ID provided")
+    
+    baustelle = job.getJob(jobid)
+    
+    timestamps = baustelle.getTimestamps()
+
+    # sort timestamps by job
+    timestamps.sort(key=lambda x: x.job_id)
+    timestamps.sort(key=lambda x: x.user_id)
+
+    accumilatedTimes = {}
+
+    for timestamp in timestamps:
+        if not timestamp.user.name in accumilatedTimes.keys():
+            accumilatedTimes[timestamp.user.get_id()] = timestamp.getWorkTime().seconds/60
+        else:
+            accumilatedTimes[timestamp.user.get_id()] += timestamp.getWorkTime().seconds/60
+
+        
+
+    usertimes : List[dict] = []
+
+    for time in accumilatedTimes:
+        usr = user.getUser(time)
+        usertimes.append({
+            "user": {
+                "name": usr.name,
+                "id": usr.username},
+            "work_time": {
+                "str": str(timedelta(minutes=accumilatedTimes[time])).split('.')[0][:-3],
+                "hour": accumilatedTimes[time] // 60,
+                "minute": accumilatedTimes[time] % 60
+            },
+        })
+
+    return render_template("exports/job.html", usertimes=usertimes, baustelle=baustelle.toHTML(), date=str(date.today()))

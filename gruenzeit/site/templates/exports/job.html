@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Baustelle {{ baustelle.name }} {{date}}{% endblock %}
+{% block navbar %}
+{% endblock %}
+{% block raw %}
+
+<div class="">
+    <div class="row">
+        <div class="col-4 text-start">Export vom {{ date }} </div>
+        <div class="col-4"></div>
+        <div class="col-4 text-end">
+            <a href="{{ url_for('.overview') }}" class="btn"><i class="bi bi-house"></i></a>
+            <button onclick="window.print()" class="btn"><i class="bi bi-printer"></i></button>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <!-- <h2 class="mb-3">Baustelle Information</h2> -->
+        <p><strong>Name:</strong> {{ baustelle.name }}</p>
+        <p><strong>Auftragsnummer:</strong> {{ baustelle.auftragsnummer }}</p>
+        <p><strong>Adresse:</strong> {{ baustelle.adresse }}</p>
+        <p><strong>Beschreibung:</strong> <br>
+            {% for line in baustelle.beschreibung %}
+            {{ line }}<br>
+            {% endfor %}
+        </p>
+    </div>
+</div>
+
+
+<!-- <h2 class="mb-3">Zeiten:</h2> -->
+
+<table class="table">
+    <tr>
+        <th> Mitarbeiter </th>
+        <th> Arbeitszeit </th>
+    </tr>
+    {% for entry in usertimes %}
+    <tr>
+        <td>{{ entry.user.name}}</td>
+        <td>{{ entry.work_time.str }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}
