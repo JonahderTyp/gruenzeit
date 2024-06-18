@@ -15,7 +15,9 @@ def before_request():
 
 @exports_site.route("/", methods=["GET", "POST"])
 def overview():
-    return render_template("exports/overview.html")
+    jobs = [i.toHTML() for i in job.getJobs()]
+
+    return render_template("exports/overview.html", jobs=jobs)
 
 
 @exports_site.get("/daily")

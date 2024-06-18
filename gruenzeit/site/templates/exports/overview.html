@@ -17,6 +17,26 @@
     </div>
 </div>
 
+<div class="card mt-5">
+    <div class="card-header">
+        Baustellen Export
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('.jobexport') }}" method="get">
+            <div class="mb-3">
+                <select class="form-select" aria-label="Default select example" name="jobid">
+                    {% for job in jobs %}
+                    <option value="{{ job.id }}">{{ job.auftragsnummer }} {{ job.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">
+                Exportieren
+            </button>
+        </form>
+    </div>
+</div>
+
 <script>
     document.getElementById('exportDate').value = new Date().toISOString().split('T')[0];
 </script>

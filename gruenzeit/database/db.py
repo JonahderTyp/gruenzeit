@@ -171,7 +171,9 @@ class job(db.Model, dictable):
         return bst
 
     @staticmethod
-    def getJobs(status: job_status) -> List[job]:
+    def getJobs(status: job_status | None = None) -> List[job]:
+        if not status:
+            return job.query.all()
         return job.query.filter_by(status_id=status.id).all()
     
     def getTimestamps(self) -> List[TimeEntries]:
