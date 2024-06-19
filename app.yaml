@@ -1,0 +1,18 @@
+runtime: python39
+
+instance_class: F2
+
+entrypoint: gunicorn -b :$PORT gruenzeit:app
+
+# env_variables:
+#   SECRET_KEY: 'hi0eS0TMVZwie82mpwVDJw'
+
+beta_settings:
+  cloud_sql_instances: gruenzeit:europe-west1:gzdb1
+
+handlers:
+- url: /static
+  static_dir: static
+
+- url: /.*
+  script: auto

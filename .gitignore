@@ -162,3 +162,5 @@ cython_debug/
 
 *.mwb.bak
 chatgpt.txt
+secrets.txt
+.gcloudignore
