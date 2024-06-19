@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, SelectField, SubmitField
-from wtforms.validators import DataRequired
+from wtforms import StringField, TextAreaField, SelectField, SubmitField, PasswordField
+from wtforms.validators import DataRequired, EqualTo
 
 
 class BaustelleForm(FlaskForm):
@@ -24,3 +24,10 @@ class VehicleSelectForm(FlaskForm):
     vehicle = SelectField('Vehicle', choices=[
                           (-1, 'Kein Fahrzeug')], validators=[DataRequired()])
     submit = SubmitField('Farhzeug wechseln')
+
+
+class ChangePasswordForm(FlaskForm):
+    new_password = PasswordField('New Password', validators=[DataRequired()])
+    confirm_password = PasswordField('Confirm New Password', validators=[
+                                     DataRequired(), EqualTo('new_password', message='Passwords must match')])
+    submit = SubmitField('Change Password')

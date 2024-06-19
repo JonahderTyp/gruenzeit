@@ -9,6 +9,7 @@ from .baustelle import baustelle_site
 from .exports import exports_site
 from .vehicles import vehicle_site
 from .team import team_site
+from .forms import ChangePasswordForm
 
 site = Blueprint("site", __name__, template_folder="templates", url_prefix="/")
 
@@ -62,8 +63,16 @@ def inject_views():
                                  "description": "Neuen Benutzer anlegen"},
                                 ],
                       "description": "Einstellungen"})
-    views.append({"name": "Logout",
-                  "url": url_for("site.logout")})
+    views.append({"name": "Profil",
+                  "multi": [{"name": "Passwort ändern",
+                             "url": url_for("site.changePassword"),
+                             "description": "Passwort ändern"},
+                            {"name": "Logout",
+                             "url": url_for("site.logout"),
+                             "description": "Abmelden"}]
+                  })
+    # views.append({"name": "Logout",
+    #               "url": url_for("site.logout")})
     return {"views": views}
 
 
@@ -113,6 +122,22 @@ def logout():
     logout_user()
     # Redirect to the index page after logout
     return redirect(url_for('site.index'))
+
+
+@site.route("/changePassword", methods=["GET", "POST"])
+@login_required
+def changePassword():
+    usr: user = current_user
+    form = ChangePasswordForm()
+    if form.validate_on_submit():
+        print("setting new password")
+        usr.setNewPassword(generate_password_hash(form.new_password.data))
+        logout_user()
+        return redirect(url_for('site.index'))
+    else:
+        print("something is invalid")
+    print(form.errors)
+    return render_template("changePassword.html", form=form)
 
 
 @site.route("/register", methods=["GET", "POST"])

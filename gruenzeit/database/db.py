@@ -55,6 +55,10 @@ class user(db.Model, UserMixin, dictable):
                 f"User mit dem Benutzernamen \"{username}\" existiert nicht")
         return usr
 
+    def setNewPassword(self, password_hash):
+        self.password_hash = password_hash
+        db.session.commit()
+
     def setVehicle(self, vehicle: vehicle | None):
         if vehicle is None:
             self.vehicle_id = None
