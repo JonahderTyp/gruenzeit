@@ -6,7 +6,7 @@
         <h5 class="card-title">Baustelle #{{ baustelle.auftragsnummer }}</h5>
 
         <!-- Edit form -->
-        <form method="POST" action="{{ url_for('.edit', id=baustelle.id) }}">
+        <form method="POST" action="{{ url_for('.edit', id=baustelle.id) }}" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
             <!-- Nummer -->
             <div class="form-floating mb-3">
@@ -35,8 +35,14 @@
 
             <!-- Status -->
             <div class="mb-3">
-                <label for="status" class="form-label"><strong>Status:</strong></label>
+                <label for="status" class="form-label">Status:</label>
                 {{ form.status(class="form-select") }}
+            </div>
+
+            <!-- Images -->
+            <div class="mb-3">
+                <label for="formFileMultiple" class="form-label">Bilder Hinzufügen</label>
+                <input class="form-control" type="file" id="formFileMultiple" name="file" accept="image/*" multiple>
             </div>
 
             <!-- Form buttons -->

@@ -122,6 +122,13 @@ def edit(id):
                 bst.status_id = form.status.data
                 bst.edit(bst.auftragsnummer, bst.name,
                          bst.adresse, bst.beschreibung)
+                if 'file' in request.files:
+                    files = request.files.getlist('file')
+                    for file in files:
+                        if file:
+                            content = base64.b64encode(
+                                file.stream.read()).decode('utf-8')
+                            Bild.uploadImage(bst, content)
                 return redirect(url_for(".baustelle", id=id))
             elif form.submit_delete.data:
                 job.deleteJob(id)
