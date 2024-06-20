@@ -6,3 +6,5 @@ Flask-SQLAlchemy
 Flask-Login
 WTForms
 Flask-WTF
+gunicorn
+PyMySQL
