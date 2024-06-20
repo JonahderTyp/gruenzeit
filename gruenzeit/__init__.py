@@ -21,9 +21,7 @@ def create_app():
 
     if config_path.is_file():
         app.config.from_pyfile(str(config_path))
-        logging.info("Loaded TEST configuration from {}".format(config_path))
-        logging.info("Configuration:")
-        logging.info(str(app.config))
+        logging.info("Loaded configuration from {}".format(config_path))
     else:
         logging.warning(
             "Configuration file not found at {}".format(config_path))
