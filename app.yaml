@@ -2,7 +2,7 @@ runtime: python39
 
 instance_class: F2
 
-entrypoint: gunicorn -b :$PORT gruenzeit:app
+entrypoint: gunicorn -b :$PORT run:app
 
 # env_variables:
 #   SECRET_KEY: 'hi0eS0TMVZwie82mpwVDJw'
@@ -12,7 +12,7 @@ beta_settings:
 
 handlers:
 - url: /static
-  static_dir: static
+  static_dir: gruenzeit/static
 
 - url: /.*
   script: auto

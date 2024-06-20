@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from sqlalchemy.orm import relationship, backref, Mapped
 from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey, Date, Boolean
+from sqlalchemy.dialects.mysql import LONGTEXT
 from .exceptions import ElementAlreadyExists, ElementDoesNotExsist
 from typing import List, Dict
 from datetime import datetime, date, timedelta
@@ -136,10 +137,10 @@ class job_status(db.Model, dictable):
 class job(db.Model, dictable):
     __tablename__ = 'job'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    auftragsnummer = Column(String(), nullable=True)
-    name = Column(String(), nullable=True)
-    adresse = Column(String(), nullable=True)
-    beschreibung = Column(String(), nullable=True)
+    auftragsnummer = Column(String(1024), nullable=True)
+    name = Column(String(1024), nullable=True)
+    adresse = Column(String(1024), nullable=True)
+    beschreibung = Column(String(4096), nullable=True)
     status_id = Column(Integer, ForeignKey('job_status.id'))
     bilder: Mapped[List[Bild]] = relationship('Bild', backref='job')
 
@@ -215,7 +216,7 @@ class TimeEntries(db.Model, dictable):
     start_time: datetime = Column(DateTime, nullable=True)
     end_time: datetime = Column(DateTime, nullable=True)
     pause_time: int = Column(Integer, nullable=True)    # in minutes
-    user_id = Column(Integer, ForeignKey('user.username'))
+    user_id = Column(String(255), ForeignKey('user.username'))
     job_id = Column(Integer, ForeignKey('job.id'))
     is_team_entry = Column(Boolean, default=False)
     user: Mapped[user] = relationship('user', backref='time_entries')
@@ -357,7 +358,7 @@ class TimeEntries(db.Model, dictable):
 class Bild(db.Model, dictable):
     __tablename__ = 'bild'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    bild = Column(String(), nullable=True)
+    bild = Column(LONGTEXT, nullable=True)
     job_id = Column(Integer, ForeignKey('job.id'))
 
     @staticmethod
